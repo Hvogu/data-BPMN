@@ -90,13 +90,12 @@
     <button class="link" id="showcase-database-button">Showcase database</button>
     <button class="link" id="mariadb-button">MariaDB</button>
 
-    <div id="table-panel"
-      style="display: none; position: absolute; background: #fff; border: 1px solid #ccc; padding: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.1); z-index: 9999;">
+    <div id="table-panel" class="hidden">
       <h3>Database Tables</h3>
       <ul id="table-list">
         <li>Loading...</li>
       </ul>
-      <button onclick="document.getElementById('table-panel').style.display='none'">Close</button>
+      <button onclick="document.getElementById('table-panel').classList.add('hidden')">Close</button>
     </div>
 
     <div id="popup" class="popup">

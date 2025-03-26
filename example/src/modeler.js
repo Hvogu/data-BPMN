@@ -462,14 +462,14 @@ mariadbButton.addEventListener('click', async () => {
 
   console.log('MariaDB button clicked!');
 
-  const rect = mariadbButton.getBoundingClientRect();
 
-  // Position panel directly below the button
-  // Position the panel just below the button
-  tablePanel.style.top = `${rect.bottom + window.scrollY + 5}px`; // 5px offset
-  tablePanel.style.left = `${rect.left + window.scrollX}px`;
-
-  tablePanel.style.display = 'block';
+  // Toggle popup
+  if (tablePanel.classList.contains('hidden')) {
+    tablePanel.classList.remove('hidden');
+  } else {
+    tablePanel.classList.add('hidden');
+    return;
+  }
   tableList.innerHTML = '<li>Loading...</li>';
 
   try {
@@ -519,6 +519,10 @@ window.addEventListener('click', (event) => {
   }
   if (!varpanel.contains(target) && target !== process) {
     varpanel.classList.add('hidden');
+  }
+
+  if (!tablePanel.contains(target) && target !== mariadbButton) {
+    tablePanel.classList.add('hidden');
   }
 
 });

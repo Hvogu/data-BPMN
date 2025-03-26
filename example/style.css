@@ -6,10 +6,14 @@
   position: absolute;
   bottom: 50px;
 }
+
 .error-input {
   border: 2px solid red;
 }
-html, body, #canvas {
+
+html,
+body,
+#canvas {
   width: 100%;
   height: 100%;
   margin: 0;
@@ -25,7 +29,8 @@ body:not(.presentation-mode) .bts-notifications {
   bottom: 60px;
 }
 
-.links, .drop-message {
+.links,
+.drop-message {
   z-index: 1;
 }
 
@@ -35,35 +40,62 @@ body:not(.presentation-mode) .bts-notifications {
   right: 24px;
 }
 
-.pre{
+.pre {
   width: 280px;
   height: 90px;
 }
-.eff{
+
+.eff {
   width: 280px;
   height: 150px;
 }
-.parsed{
-  border: 5px solid green; /* Customize the border color or style */
-  background-color: #ffe6e6; /* Customize the background color */
-  
+
+.parsed {
+  border: 5px solid green;
+  /* Customize the border color or style */
+  background-color: #ffe6e6;
+  /* Customize the background color */
+
 }
 
 #jsonData {
-width: 150%; /* Set the width to 100% of its container */
-height: 180px; /* Set the initial height */
-resize: vertical; /* Allow vertical resizing only */
+  width: 150%;
+  /* Set the width to 100% of its container */
+  height: 180px;
+  /* Set the initial height */
+  resize: vertical;
+  /* Allow vertical resizing only */
 }
+
 #connection {
   color: #111;
   left: 50%;
   width: 100%;
   height: 100%;
-  bottom: 200px;;
+  bottom: 200px;
+  ;
   position: absolute;
   transform: translate(-50%, -50%);
   position: absolute;
 }
+
+#table-panel {
+  position: absolute;
+  left: 100%;
+  bottom: 1px;
+  transform: translate(-50%, -50%);
+  width: 50%;
+  /* 🔼 Wider */
+  max-height: 150px;
+  /* 🔼 Taller */
+  background-color: white;
+  color: #111;
+
+  overflow-y: auto;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+
 /* Custom adds */
 .arrow-button {
   padding: 10px 20px;
@@ -77,16 +109,22 @@ resize: vertical; /* Allow vertical resizing only */
 }
 
 .arrow-down::after {
-  content: "\2193"; /* Unicode character for arrow down */
-  margin-left: 5px; /* Adding some space between the arrow and the text */
+  content: "\2193";
+  /* Unicode character for arrow down */
+  margin-left: 5px;
+  /* Adding some space between the arrow and the text */
 }
 
 .dynamicButton {
-  background-color: #ffffff; /* Set the background color */
-  color: #140101; /* Set the text color to white */
-  border-radius: 5px; /* Add rounded corners */
+  background-color: #ffffff;
+  /* Set the background color */
+  color: #140101;
+  /* Set the text color to white */
+  border-radius: 5px;
+  /* Add rounded corners */
   width: 20%;
-  height: 17px;;
+  height: 17px;
+  ;
 }
 
 .bpmn-icon-data-store.gold {
@@ -94,7 +132,7 @@ resize: vertical; /* Allow vertical resizing only */
 }
 
 
- 
+
 .arrow-button {
   padding: 10px 20px;
   font-size: 16px;
@@ -129,7 +167,7 @@ resize: vertical; /* Allow vertical resizing only */
   background-color: var(--token-simulation-green-base-44, #10D070);
 }
 
-.links .link + .link {
+.links .link+.link {
   margin-left: 20px;
 }
 
@@ -147,13 +185,18 @@ resize: vertical; /* Allow vertical resizing only */
 
   display: flex;
 }
- /*custom */
- .dynamicButton {
-  background-color: #ffffff; /* Set the background color */
-  color: #140101; /* Set the text color to white */
-  border-radius: 5px; /* Add rounded corners */
+
+/*custom */
+.dynamicButton {
+  background-color: #ffffff;
+  /* Set the background color */
+  color: #140101;
+  /* Set the text color to white */
+  border-radius: 5px;
+  /* Add rounded corners */
   width: 20%;
-  height: 17px;;
+  height: 17px;
+  ;
 }
 
 .bottom-links {
@@ -166,7 +209,8 @@ resize: vertical; /* Allow vertical resizing only */
   color: #0a64ff !important;
 }
 
-.canvas, .properties-panel {
+.canvas,
+.properties-panel {
   justify-content: stretch;
 }
 
@@ -207,7 +251,7 @@ resize: vertical; /* Allow vertical resizing only */
   width: 22px;
   z-index: 3;
 
-  cursor:  e-resize;
+  cursor: e-resize;
 }
 
 .properties-panel-resize-handle {
@@ -228,7 +272,8 @@ resize: vertical; /* Allow vertical resizing only */
 }
 
 .properties-panel-resizer:hover .properties-panel-resize-handle {
-  border-right: solid 3px hsl(205, 100%, 50%);;
+  border-right: solid 3px hsl(205, 100%, 50%);
+  ;
 }
 
 .bio-properties-panel-container {

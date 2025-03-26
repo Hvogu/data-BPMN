@@ -82,6 +82,14 @@ async function deleteFromTable(tableName, parameter, value) {
     }
 
 }
+
+async function updateTable(tableName, variables, conditions) {
+
+    let procedure;
+
+
+
+}
 const newEmployee = {
     name: 'John boeman',
     email: 'johnboeman1234@gmail.com',
