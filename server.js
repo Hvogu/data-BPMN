@@ -1,5 +1,8 @@
 const pool = require('./db'); // Import MariaDB connection
-
+const express = require('express');
+const getSchema = require('./ERD-diagram/getSchema');
+const generateErd = require('./ERD-diagram/generateErd');
+const cors = require('cors');
 async function fetchTable(tableName) {
     let conn;
     try {
@@ -86,6 +89,55 @@ const newEmployee = {
     position: 'Developer'
 };
 
-//addToTable('employee', newEmployee);
-deleteFromTable('employee', 'id', 8);
-//fetchTable('employee');
+
+
+const app = express();
+const corsOptions = {
+    origin: 'http://localhost:8080', // Replace with your frontend's domain and port
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+};
+
+app.use(cors(corsOptions));
+
+app.get('/api/generate-erd', async (req, res) => {
+    try {
+        console.log("🛠️ Generating schema and ERD...");
+        await getSchema();        // Step 1: Create schema.json
+        await generateErd();      // Step 2: Generate erd-diagram.svg
+        res.status(200).json({ success: true, message: 'ERD generated successfully' });
+    } catch (error) {
+        console.error("❌ Failed to generate ERD:", error);
+        res.status(500).json({ success: false, message: 'Error generating ERD' });
+    }
+});
+
+app.get('/erd', (req, res) => {
+    res.sendFile(__dirname + '/ERD-diagram/erd-diagram.svg');
+});
+
+app.get('/api/allTables', async (req, res) => {
+    let conn;
+    try {
+        conn = await pool.getConnection();
+        const dbResult = await conn.query("SELECT DATABASE() AS db");
+        const dbName = dbResult[0].db;
+
+        const tables = await conn.query(
+            `SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ?`,
+            [dbName]
+        );
+
+        const tableNames = tables.map(t => t.TABLE_NAME);
+        res.json(tableNames);
+    } catch (err) {
+        console.error("❌ Error fetching tables:", err);
+        res.status(500).json({ error: "Failed to retrieve table names" });
+    } finally {
+        if (conn) conn.release();
+    }
+});
+
+
+app.listen(3000, () => {
+    console.log(`Server is running on port 3000`);
+});

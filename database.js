@@ -8,8 +8,8 @@ dotenv.config();
 const app = express();
 
 const corsOptions = {
-    origin: 'http://localhost:8080', // Replace with your frontend's domain and port
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  origin: 'http://localhost:8080', // Replace with your frontend's domain and port
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
 };
 
 app.use(cors(corsOptions));
@@ -26,12 +26,12 @@ function isDatabaseInitialized() {
 // Endpoint for checking database initialization
 app.get('/check_database', (req, res) => {
   if (isDatabaseInitialized()) {
-      if(db==undefined)
-        db = new sqlite3.Database('database.db');
-      res.send('yes');
+    if (db == undefined)
+      db = new sqlite3.Database('database.db');
+    res.send('yes');
   } else {
-      // Respond with 'no' if the database is not initialized
-      res.send('no');
+    // Respond with 'no' if the database is not initialized
+    res.send('no');
   }
 });
 
@@ -39,18 +39,18 @@ app.get('/check_database', (req, res) => {
 app.post('/populate_database', express.json(), (req, res) => {
 
   const { customData } = req.body;
-    if (!customData) {
-        console.log("Error b");
-        return res.status(400).send("Data cannot be empty");
-    }
+  if (!customData) {
+    console.log("Error b");
+    return res.status(400).send("Data cannot be empty");
+  }
   // Check if the database is initialized
   if (!isDatabaseInitialized()) {
-      // Initialize the database using your populateDatabase function
-      initializeDatabase(customData);
-     
+    // Initialize the database using your populateDatabase function
+    initializeDatabase(customData);
+
   }
   res.json({ status: 'success' });
-  
+
 });
 
 
@@ -60,45 +60,45 @@ function initializeDatabase(data) {
   populateDatabase(data);
 }
 
-  app.post('/executeQuery', express.json(), (req, res) => {
-    const { query } = req.body;
-  
-    if (!query) {
-      return res.status(400).json({ error: 'Missing query parameter' });
+app.post('/executeQuery', express.json(), (req, res) => {
+  const { query } = req.body;
+
+  if (!query) {
+    return res.status(400).json({ error: 'Missing query parameter' });
+  }
+
+  // Execute the provided SQL query
+  db.all(query, (err, result) => {
+    if (err) {
+      console.error('Error executing query:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
     }
-  
-    // Execute the provided SQL query
-    db.all(query, (err, result) => {
-      if (err) {
-        console.error('Error executing query:', err);
-        return res.status(500).json({ error: 'Internal Server Error' });
-      }
-      console.log(result)
-      res.json(result);
-    });
+    console.log(result)
+    res.json(result);
   });
+});
 app.post('/api/save', (req, res) => {
-    const { customData } = req.body;
-    if (!customData) {
-        console.log("Error b");
-        return res.status(400).send("Data cannot be empty");
-    }
+  const { customData } = req.body;
+  if (!customData) {
+    console.log("Error b");
+    return res.status(400).send("Data cannot be empty");
+  }
 
-    try{
-        populateDatabase(customData);
-        
+  try {
+    populateDatabase(customData);
+
     res.sendStatus(200);
-    }catch(err){
-        console.log('insert')
-        console.log(err)
-        res.sendStatus(400).send('Error inserting data.')
-    }
+  } catch (err) {
+    console.log('insert')
+    console.log(err)
+    res.sendStatus(400).send('Error inserting data.')
+  }
 
-  
+
 });
 const populateDatabase = (data) => {
 
-  
+
   Object.keys(data).forEach((tableName) => {
     const tableData = data[tableName];
 
@@ -151,37 +151,37 @@ const getType = (value) => {
   }
 };
 
-  
-  const dropTables = (callback) => {
-    db.serialize(() => {
-      db.run('PRAGMA foreign_keys=off');
-      db.run('BEGIN TRANSACTION');
-  
-      // Get a list of all tables in the database
-      const tables = [];
-      db.each("SELECT name FROM sqlite_master WHERE type='table'", (err, row) => {
-        if (row.name !== 'sqlite_sequence') {
-          tables.push(row.name);
-        }
-      }, () => {
-        // Drop each table
-        tables.forEach(table => {
-          db.run(`DROP TABLE IF EXISTS ${table}`);
-        });
-  
-        db.run('COMMIT');
-        db.run('PRAGMA foreign_keys=on');
-        
+
+const dropTables = (callback) => {
+  db.serialize(() => {
+    db.run('PRAGMA foreign_keys=off');
+    db.run('BEGIN TRANSACTION');
+
+    // Get a list of all tables in the database
+    const tables = [];
+    db.each("SELECT name FROM sqlite_master WHERE type='table'", (err, row) => {
+      if (row.name !== 'sqlite_sequence') {
+        tables.push(row.name);
+      }
+    }, () => {
+      // Drop each table
+      tables.forEach(table => {
+        db.run(`DROP TABLE IF EXISTS ${table}`);
       });
+
+      db.run('COMMIT');
+      db.run('PRAGMA foreign_keys=on');
+
     });
-  };
-  
+  });
+};
+
 
 
 const port = process.env.PORT || 3000;
 
 
 
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
+// app.listen(port, () => {
+//   console.log(`Server is running on port ${port}`);
+// });
