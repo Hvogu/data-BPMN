@@ -91,11 +91,21 @@
     <button class="link" id="mariadb-button">MariaDB</button>
 
     <div id="table-panel" class="hidden">
-      <h3>Database Tables</h3>
-      <ul id="table-list">
-        <li>Loading...</li>
-      </ul>
-      <button onclick="document.getElementById('table-panel').classList.add('hidden')">Close</button>
+      <div id="table-list-view">
+        <div style="display: flex; flex-direction: row; padding: 5px;">
+          <h3>Database Tables</h3>
+          <button style="max-height: 30px; margin-left: 30px;" id="open-tables-page">open in mew window</button>
+        </div>
+
+        <ul id="table-list">
+          <li>Loading...</li>
+        </ul>
+      </div>
+      <div id="table-data-view" style="display: none;">
+        <h3 id="table-title">Rows in table</h3>
+        <table id="table-data" style="width: 100%; margin-bottom: 10px;"></table>
+        <button id="back-button">← Back to Tables</button>
+      </div>
     </div>
 
     <div id="popup" class="popup">

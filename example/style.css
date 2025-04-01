@@ -94,6 +94,33 @@ body:not(.presentation-mode) .bts-notifications {
   overflow-y: auto;
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.15);
   border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+#table-list a {
+  display: inline-block;
+  padding: 6px 12px;
+  margin: 4px 0;
+  background-color: #007BFF;
+  /* Bootstrap-style blue */
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: sans-serif;
+}
+
+#table-list a:hover {
+  background-color: white;
+  color: #007BFF;
+  border: 1px solid #007BFF;
+}
+
+#table-panel.expanded {
+  max-height: 400px;
+  width: 70%;
+  /* Optional: make it wider when expanded */
+  overflow-y: auto;
 }
 
 /* Custom adds */

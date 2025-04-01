@@ -1,578 +1,267 @@
 {
   "tables": [
     {
-      "TABLE_NAME": "api_key",
-      "COLUMN_NAME": "stored_key",
-      "DATA_TYPE": "varchar",
+      "TABLE_NAME": "center",
+      "COLUMN_NAME": "CenterID",
+      "DATA_TYPE": "decimal",
       "COLUMN_KEY": "PRI"
     },
     {
-      "TABLE_NAME": "api_key",
-      "COLUMN_NAME": "last_updated",
-      "DATA_TYPE": "bigint",
+      "TABLE_NAME": "center",
+      "COLUMN_NAME": "Location",
+      "DATA_TYPE": "varchar",
       "COLUMN_KEY": ""
     },
     {
-      "TABLE_NAME": "course",
-      "COLUMN_NAME": "course_id",
-      "DATA_TYPE": "bigint",
+      "TABLE_NAME": "center",
+      "COLUMN_NAME": "Capacity",
+      "DATA_TYPE": "decimal",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "employee",
+      "COLUMN_NAME": "EmployeeID",
+      "DATA_TYPE": "decimal",
       "COLUMN_KEY": "PRI"
     },
     {
-      "TABLE_NAME": "course",
-      "COLUMN_NAME": "ects",
-      "DATA_TYPE": "float",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course",
-      "COLUMN_NAME": "kuid",
+      "TABLE_NAME": "employee",
+      "COLUMN_NAME": "Name",
       "DATA_TYPE": "varchar",
       "COLUMN_KEY": ""
     },
     {
-      "TABLE_NAME": "course",
-      "COLUMN_NAME": "level",
-      "DATA_TYPE": "varchar",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course",
-      "COLUMN_NAME": "course_name",
-      "DATA_TYPE": "varchar",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course",
-      "COLUMN_NAME": "schedule",
-      "DATA_TYPE": "varchar",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course",
-      "COLUMN_NAME": "student_count",
-      "DATA_TYPE": "int",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course",
-      "COLUMN_NAME": "weight",
-      "DATA_TYPE": "float",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course",
-      "COLUMN_NAME": "year",
-      "DATA_TYPE": "int",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course",
-      "COLUMN_NAME": "period_id",
-      "DATA_TYPE": "bigint",
+      "TABLE_NAME": "employee",
+      "COLUMN_NAME": "CenterID",
+      "DATA_TYPE": "decimal",
       "COLUMN_KEY": "MUL"
     },
     {
-      "TABLE_NAME": "course",
-      "COLUMN_NAME": "period",
-      "DATA_TYPE": "int",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course",
-      "COLUMN_NAME": "external_id",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course",
-      "COLUMN_NAME": "tenant_id",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course",
-      "COLUMN_NAME": "short_name",
+      "TABLE_NAME": "employee",
+      "COLUMN_NAME": "AccountNumber",
       "DATA_TYPE": "varchar",
       "COLUMN_KEY": ""
     },
     {
-      "TABLE_NAME": "course_info",
-      "COLUMN_NAME": "course_id",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course_info",
-      "COLUMN_NAME": "course_name",
-      "DATA_TYPE": "varchar",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course_info",
-      "COLUMN_NAME": "ects",
-      "DATA_TYPE": "float",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course_info",
-      "COLUMN_NAME": "weight",
-      "DATA_TYPE": "float",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course_info",
-      "COLUMN_NAME": "percentage_filled",
-      "DATA_TYPE": "double",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course_info",
-      "COLUMN_NAME": "teachers",
-      "DATA_TYPE": "mediumtext",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course_info",
-      "COLUMN_NAME": "period",
-      "DATA_TYPE": "int",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course_info",
-      "COLUMN_NAME": "schedule",
-      "DATA_TYPE": "varchar",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course_info",
-      "COLUMN_NAME": "year",
-      "DATA_TYPE": "int",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course_info",
-      "COLUMN_NAME": "level",
-      "DATA_TYPE": "varchar",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course_info",
-      "COLUMN_NAME": "student_count",
-      "DATA_TYPE": "int",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "course_requires_skill",
-      "COLUMN_NAME": "course_id",
-      "DATA_TYPE": "bigint",
+      "TABLE_NAME": "equipment",
+      "COLUMN_NAME": "Number",
+      "DATA_TYPE": "decimal",
       "COLUMN_KEY": "PRI"
     },
     {
-      "TABLE_NAME": "course_requires_skill",
-      "COLUMN_NAME": "skill_id",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": "PRI"
-    },
-    {
-      "TABLE_NAME": "course_seq",
-      "COLUMN_NAME": "next_val",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "group_seq",
-      "COLUMN_NAME": "next_val",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "period",
-      "COLUMN_NAME": "period_id",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": "PRI"
-    },
-    {
-      "TABLE_NAME": "period",
-      "COLUMN_NAME": "period_name",
-      "DATA_TYPE": "varchar",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "period_seq",
-      "COLUMN_NAME": "next_val",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "responsibility",
-      "COLUMN_NAME": "responsibility_id",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": "PRI"
-    },
-    {
-      "TABLE_NAME": "responsibility",
-      "COLUMN_NAME": "responsibility",
-      "DATA_TYPE": "float",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "responsibility",
-      "COLUMN_NAME": "course_id",
-      "DATA_TYPE": "bigint",
+      "TABLE_NAME": "equipment",
+      "COLUMN_NAME": "CenterID",
+      "DATA_TYPE": "decimal",
       "COLUMN_KEY": "MUL"
     },
     {
-      "TABLE_NAME": "responsibility",
-      "COLUMN_NAME": "teacher_id",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": "MUL"
-    },
-    {
-      "TABLE_NAME": "responsibility",
-      "COLUMN_NAME": "tenant_id",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "responsibility_seq",
-      "COLUMN_NAME": "next_val",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "section",
-      "COLUMN_NAME": "section_id",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": "PRI"
-    },
-    {
-      "TABLE_NAME": "section",
-      "COLUMN_NAME": "external_id",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "section",
-      "COLUMN_NAME": "section_name",
+      "TABLE_NAME": "equipment",
+      "COLUMN_NAME": "Brand",
       "DATA_TYPE": "varchar",
       "COLUMN_KEY": ""
     },
     {
-      "TABLE_NAME": "section",
-      "COLUMN_NAME": "tenant_id",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "section_info",
-      "COLUMN_NAME": "section_id",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "section_info",
-      "COLUMN_NAME": "section_name",
-      "DATA_TYPE": "varchar",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "section_info",
-      "COLUMN_NAME": "teacher_count",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "section_info",
-      "COLUMN_NAME": "total_responsibility",
-      "DATA_TYPE": "double",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "section_seq",
-      "COLUMN_NAME": "next_val",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "skill",
-      "COLUMN_NAME": "skill_id",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": "PRI"
-    },
-    {
-      "TABLE_NAME": "skill",
-      "COLUMN_NAME": "skill_name",
-      "DATA_TYPE": "varchar",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "skill",
-      "COLUMN_NAME": "tenant_id",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "skill_seq",
-      "COLUMN_NAME": "next_val",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "teacher",
-      "COLUMN_NAME": "teacher_id",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": "PRI"
-    },
-    {
-      "TABLE_NAME": "teacher",
-      "COLUMN_NAME": "kuid",
-      "DATA_TYPE": "varchar",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "teacher",
-      "COLUMN_NAME": "birth_year",
-      "DATA_TYPE": "int",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "teacher",
-      "COLUMN_NAME": "gender",
-      "DATA_TYPE": "varchar",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "teacher",
-      "COLUMN_NAME": "full_name",
-      "DATA_TYPE": "varchar",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "teacher",
-      "COLUMN_NAME": "percentage_hired",
-      "DATA_TYPE": "float",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "teacher",
-      "COLUMN_NAME": "quota",
-      "DATA_TYPE": "float",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "teacher",
-      "COLUMN_NAME": "teaching_reduction",
-      "DATA_TYPE": "float",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "teacher",
-      "COLUMN_NAME": "group_id",
-      "DATA_TYPE": "varchar",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "teacher",
-      "COLUMN_NAME": "external_id",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "teacher",
-      "COLUMN_NAME": "phd_year",
-      "DATA_TYPE": "int",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "teacher",
-      "COLUMN_NAME": "professor_level",
+      "TABLE_NAME": "equipment",
+      "COLUMN_NAME": "Type",
       "DATA_TYPE": "enum",
       "COLUMN_KEY": ""
     },
     {
-      "TABLE_NAME": "teacher",
-      "COLUMN_NAME": "section_id",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": "MUL"
-    },
-    {
-      "TABLE_NAME": "teacher",
-      "COLUMN_NAME": "tenant_id",
-      "DATA_TYPE": "bigint",
+      "TABLE_NAME": "equipment",
+      "COLUMN_NAME": "Weight",
+      "DATA_TYPE": "decimal",
       "COLUMN_KEY": ""
     },
     {
-      "TABLE_NAME": "teacher_has_skill",
-      "COLUMN_NAME": "teacher_id",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": "MUL"
-    },
-    {
-      "TABLE_NAME": "teacher_has_skill",
-      "COLUMN_NAME": "skill_id",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": "MUL"
-    },
-    {
-      "TABLE_NAME": "teacher_info",
-      "COLUMN_NAME": "teacher_id",
-      "DATA_TYPE": "bigint",
+      "TABLE_NAME": "equipment",
+      "COLUMN_NAME": "DateOFPurchase",
+      "DATA_TYPE": "date",
       "COLUMN_KEY": ""
     },
     {
-      "TABLE_NAME": "teacher_info",
-      "COLUMN_NAME": "full_name",
+      "TABLE_NAME": "equipment",
+      "COLUMN_NAME": "Working",
+      "DATA_TYPE": "tinyint",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "member",
+      "COLUMN_NAME": "PersonID",
       "DATA_TYPE": "varchar",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "teacher_info",
-      "COLUMN_NAME": "birth_year",
-      "DATA_TYPE": "int",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "teacher_info",
-      "COLUMN_NAME": "responsibility_ratio",
-      "DATA_TYPE": "double",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "teacher_info",
-      "COLUMN_NAME": "responsibility_count",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "teacher_info",
-      "COLUMN_NAME": "quota",
-      "DATA_TYPE": "float",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "teacher_info",
-      "COLUMN_NAME": "percentage_hired",
-      "DATA_TYPE": "float",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "teacher_info",
-      "COLUMN_NAME": "teaching_reduction",
-      "DATA_TYPE": "float",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "teacher_seq",
-      "COLUMN_NAME": "next_val",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "tenant",
-      "COLUMN_NAME": "tenant_id",
-      "DATA_TYPE": "bigint",
       "COLUMN_KEY": "PRI"
     },
     {
-      "TABLE_NAME": "tenant",
-      "COLUMN_NAME": "tenant_name",
-      "DATA_TYPE": "varchar",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "tenant_seq",
-      "COLUMN_NAME": "next_val",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "user",
-      "COLUMN_NAME": "user_id",
-      "DATA_TYPE": "bigint",
+      "TABLE_NAME": "member",
+      "COLUMN_NAME": "CenterID",
+      "DATA_TYPE": "decimal",
       "COLUMN_KEY": "PRI"
     },
     {
-      "TABLE_NAME": "user",
-      "COLUMN_NAME": "user_password",
+      "TABLE_NAME": "member",
+      "COLUMN_NAME": "MembershipID",
+      "DATA_TYPE": "decimal",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "membership",
+      "COLUMN_NAME": "MembershipID",
+      "DATA_TYPE": "decimal",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "membership",
+      "COLUMN_NAME": "ProductID",
+      "DATA_TYPE": "decimal",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "person",
+      "COLUMN_NAME": "PersonID",
+      "DATA_TYPE": "varchar",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "person",
+      "COLUMN_NAME": "AccountNumber",
       "DATA_TYPE": "varchar",
       "COLUMN_KEY": ""
     },
     {
-      "TABLE_NAME": "user",
-      "COLUMN_NAME": "tenant_id",
-      "DATA_TYPE": "bigint",
-      "COLUMN_KEY": ""
-    },
-    {
-      "TABLE_NAME": "user",
-      "COLUMN_NAME": "user_username",
+      "TABLE_NAME": "person",
+      "COLUMN_NAME": "name",
       "DATA_TYPE": "varchar",
       "COLUMN_KEY": ""
     },
     {
-      "TABLE_NAME": "user_seq",
-      "COLUMN_NAME": "next_val",
-      "DATA_TYPE": "bigint",
+      "TABLE_NAME": "person",
+      "COLUMN_NAME": "Address",
+      "DATA_TYPE": "varchar",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "person",
+      "COLUMN_NAME": "CPR",
+      "DATA_TYPE": "varchar",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "product",
+      "COLUMN_NAME": "ProductID",
+      "DATA_TYPE": "decimal",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "product",
+      "COLUMN_NAME": "Name",
+      "DATA_TYPE": "varchar",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "product",
+      "COLUMN_NAME": "Price",
+      "DATA_TYPE": "decimal",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "transaction",
+      "COLUMN_NAME": "TransactionID",
+      "DATA_TYPE": "decimal",
+      "COLUMN_KEY": "PRI"
+    },
+    {
+      "TABLE_NAME": "transaction",
+      "COLUMN_NAME": "PersonID",
+      "DATA_TYPE": "varchar",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "transaction",
+      "COLUMN_NAME": "ProductID",
+      "DATA_TYPE": "decimal",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "transaction",
+      "COLUMN_NAME": "CenterID",
+      "DATA_TYPE": "decimal",
+      "COLUMN_KEY": "MUL"
+    },
+    {
+      "TABLE_NAME": "transaction",
+      "COLUMN_NAME": "Price",
+      "DATA_TYPE": "decimal",
+      "COLUMN_KEY": ""
+    },
+    {
+      "TABLE_NAME": "transaction",
+      "COLUMN_NAME": "BuyTime",
+      "DATA_TYPE": "datetime",
       "COLUMN_KEY": ""
     }
   ],
   "foreignKeys": [
     {
-      "TABLE_NAME": "course",
-      "COLUMN_NAME": "period_id",
-      "CONSTRAINT_NAME": "FK5efmmmbbf46nls6qnyjirgg5u",
-      "REFERENCED_TABLE_NAME": "period",
-      "REFERENCED_COLUMN_NAME": "period_id"
+      "TABLE_NAME": "employee",
+      "COLUMN_NAME": "CenterID",
+      "CONSTRAINT_NAME": "employee_ibfk_1",
+      "REFERENCED_TABLE_NAME": "center",
+      "REFERENCED_COLUMN_NAME": "CenterID"
     },
     {
-      "TABLE_NAME": "course_requires_skill",
-      "COLUMN_NAME": "course_id",
-      "CONSTRAINT_NAME": "FKasrpehvdlj61q6e6op6lnikm",
-      "REFERENCED_TABLE_NAME": "course",
-      "REFERENCED_COLUMN_NAME": "course_id"
+      "TABLE_NAME": "equipment",
+      "COLUMN_NAME": "CenterID",
+      "CONSTRAINT_NAME": "equipment_ibfk_1",
+      "REFERENCED_TABLE_NAME": "center",
+      "REFERENCED_COLUMN_NAME": "CenterID"
     },
     {
-      "TABLE_NAME": "course_requires_skill",
-      "COLUMN_NAME": "skill_id",
-      "CONSTRAINT_NAME": "FKrr8no0ka6srwril4ljondp9ga",
-      "REFERENCED_TABLE_NAME": "skill",
-      "REFERENCED_COLUMN_NAME": "skill_id"
+      "TABLE_NAME": "member",
+      "COLUMN_NAME": "CenterID",
+      "CONSTRAINT_NAME": "member_ibfk_1",
+      "REFERENCED_TABLE_NAME": "center",
+      "REFERENCED_COLUMN_NAME": "CenterID"
     },
     {
-      "TABLE_NAME": "responsibility",
-      "COLUMN_NAME": "course_id",
-      "CONSTRAINT_NAME": "FKbgvjygket7k3ku3afi1k0njnq",
-      "REFERENCED_TABLE_NAME": "course",
-      "REFERENCED_COLUMN_NAME": "course_id"
+      "TABLE_NAME": "member",
+      "COLUMN_NAME": "MembershipID",
+      "CONSTRAINT_NAME": "member_ibfk_2",
+      "REFERENCED_TABLE_NAME": "membership",
+      "REFERENCED_COLUMN_NAME": "MembershipID"
     },
     {
-      "TABLE_NAME": "responsibility",
-      "COLUMN_NAME": "teacher_id",
-      "CONSTRAINT_NAME": "FKd1vbyvty4908uc2bxa6d7dt3t",
-      "REFERENCED_TABLE_NAME": "teacher",
-      "REFERENCED_COLUMN_NAME": "teacher_id"
+      "TABLE_NAME": "member",
+      "COLUMN_NAME": "PersonID",
+      "CONSTRAINT_NAME": "member_ibfk_3",
+      "REFERENCED_TABLE_NAME": "person",
+      "REFERENCED_COLUMN_NAME": "PersonID"
     },
     {
-      "TABLE_NAME": "teacher",
-      "COLUMN_NAME": "section_id",
-      "CONSTRAINT_NAME": "FKh1maq5y6v60jpr5qw81upu43h",
-      "REFERENCED_TABLE_NAME": "section",
-      "REFERENCED_COLUMN_NAME": "section_id"
+      "TABLE_NAME": "membership",
+      "COLUMN_NAME": "ProductID",
+      "CONSTRAINT_NAME": "membership_ibfk_1",
+      "REFERENCED_TABLE_NAME": "product",
+      "REFERENCED_COLUMN_NAME": "ProductID"
     },
     {
-      "TABLE_NAME": "teacher_has_skill",
-      "COLUMN_NAME": "skill_id",
-      "CONSTRAINT_NAME": "FKg72iqbwiurwswc56po14jx1it",
-      "REFERENCED_TABLE_NAME": "skill",
-      "REFERENCED_COLUMN_NAME": "skill_id"
+      "TABLE_NAME": "transaction",
+      "COLUMN_NAME": "PersonID",
+      "CONSTRAINT_NAME": "transaction_ibfk_1",
+      "REFERENCED_TABLE_NAME": "person",
+      "REFERENCED_COLUMN_NAME": "PersonID"
     },
     {
-      "TABLE_NAME": "teacher_has_skill",
-      "COLUMN_NAME": "teacher_id",
-      "CONSTRAINT_NAME": "FKtfpq0rlnen8iolq6juy8xv0p0",
-      "REFERENCED_TABLE_NAME": "teacher",
-      "REFERENCED_COLUMN_NAME": "teacher_id"
+      "TABLE_NAME": "transaction",
+      "COLUMN_NAME": "ProductID",
+      "CONSTRAINT_NAME": "transaction_ibfk_2",
+      "REFERENCED_TABLE_NAME": "product",
+      "REFERENCED_COLUMN_NAME": "ProductID"
+    },
+    {
+      "TABLE_NAME": "transaction",
+      "COLUMN_NAME": "CenterID",
+      "CONSTRAINT_NAME": "transaction_ibfk_3",
+      "REFERENCED_TABLE_NAME": "center",
+      "REFERENCED_COLUMN_NAME": "CenterID"
     }
   ]
 }

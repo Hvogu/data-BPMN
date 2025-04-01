@@ -7,7 +7,7 @@ const pool = mariadb.createPool({
     port: 3306,              // Port is specified separately
     user: 'root',            // Your MariaDB username
     password: 'bananjesper33', // Your MariaDB password
-    database: 'nbi_teaching', // Your database name
+    database: 'jespersgym', // Your database name
     connectionLimit: 10,     // Increased connection limit
     acquireTimeout: 20000,   // Increased timeout (20 sec)
 });

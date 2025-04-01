@@ -45,4 +45,4 @@ async function getSchema() {
 }
 
 module.exports = getSchema;
-
+getSchema();

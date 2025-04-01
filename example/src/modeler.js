@@ -457,6 +457,14 @@ showcaseDatabase.addEventListener('click', async () => {
 const mariadbButton = document.getElementById('mariadb-button')
 const tablePanel = document.getElementById('table-panel');
 const tableList = document.getElementById('table-list');
+const dbwindowbtn = document.getElementById('open-tables-page').addEventListener('click', () => {
+  window.open("/NewWindowsHTML/DBWindow.html", "_blank");
+});
+document.getElementById('back-button').addEventListener('click', () => {
+  document.getElementById('table-data-view').style.display = 'none';
+  document.getElementById('table-list-view').style.display = 'block';
+  document.getElementById('table-panel').classList.remove('expanded');
+});
 
 mariadbButton.addEventListener('click', async () => {
 
@@ -483,7 +491,13 @@ mariadbButton.addEventListener('click', async () => {
     tableList.innerHTML = '';
     tables.forEach(table => {
       const li = document.createElement('li');
-      li.textContent = table;
+      li.innerHTML = `<a href="#" data-table="${table}">${table}</a>`;
+      li.querySelector('a').addEventListener('click', async (e) => {
+        e.preventDefault();
+        const tableName = e.target.dataset.table;
+        await fetchAndDisplayTableData(tableName);
+        document.getElementById('table-panel').classList.add('expanded');
+      });
       tableList.appendChild(li);
     });
     console.log('Tables fetched successfully:', tables);
@@ -494,6 +508,52 @@ mariadbButton.addEventListener('click', async () => {
   }
 
 });
+
+async function fetchAndDisplayTableData(tableName) {
+  try {
+    const res = await fetch(`http://localhost:3000/api/table/${tableName}`);
+    const rows = await res.json();
+
+    // Update title
+    document.getElementById('table-title').innerText = `Rows in "${tableName}"`;
+
+    const table = document.getElementById('table-data');
+    table.innerHTML = '';
+
+    if (rows.length === 0) {
+      table.innerHTML = '<tr><td colspan="100%">No data</td></tr>';
+    } else {
+      // Headers
+      const headers = Object.keys(rows[0]);
+      const thead = document.createElement('tr');
+      headers.forEach(h => {
+        const th = document.createElement('th');
+        th.textContent = h;
+        thead.appendChild(th);
+      });
+      table.appendChild(thead);
+
+      // Data rows
+      rows.forEach(row => {
+        const tr = document.createElement('tr');
+        headers.forEach(h => {
+          const td = document.createElement('td');
+          td.textContent = row[h];
+          tr.appendChild(td);
+        });
+        table.appendChild(tr);
+      });
+    }
+
+    // Toggle views
+    document.getElementById('table-list-view').style.display = 'none';
+    document.getElementById('table-data-view').style.display = 'block';
+
+  } catch (err) {
+    console.error("Error fetching table data:", err);
+  }
+}
+
 
 
 const connection = document.getElementById('connection')

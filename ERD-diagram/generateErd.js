@@ -52,3 +52,4 @@ chokidar.watch('schema.json').on('change', () => {
     console.log("🔄 Detected schema change, regenerating ERD...");
     generateErd();
 });
+generateErd(); // Initial call to generate ERD on startup
