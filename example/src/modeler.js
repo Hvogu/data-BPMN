@@ -458,7 +458,9 @@ const mariadbButton = document.getElementById('mariadb-button')
 const tablePanel = document.getElementById('table-panel');
 const tableList = document.getElementById('table-list');
 const dbwindowbtn = document.getElementById('open-tables-page').addEventListener('click', () => {
-  window.open("/NewWindowsHTML/DBWindow.html", "_blank");
+  window.open("/DBWindow.html", "_blank");
+
+
 });
 document.getElementById('back-button').addEventListener('click', () => {
   document.getElementById('table-data-view').style.display = 'none';
