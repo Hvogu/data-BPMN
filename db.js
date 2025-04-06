@@ -291,9 +291,9 @@ async function updateTable(tableName, conditions, variableChange) {
         const primaryKey = await getPrimaryKey(tableName)
         const proc = await createProc(tableName, primaryKey, conditions, variableChange)
         console.log(proc);
-        // conn = await pool.getConnection(); // Get a connection
-        // await conn.query(proc); // Execute the query
-        // console.log("Procedure created successfully.");
+        conn = await pool.getConnection(); // Get a connection
+        await conn.query(proc); // Execute the query
+        console.log("Procedure created successfully.");
 
     } catch (error) {
         console.error(` Error creating procedure for ${tableName}:`, error);

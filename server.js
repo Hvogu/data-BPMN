@@ -96,6 +96,9 @@ function safeJson(data) {
 app.post("/api/checkMDBConnection", async (req, res) => {
     const { host, port, user, password, database } = req.body;
 
+    if (!host || !port || !user || !password || !database) {
+        return res.status(400).json({ error: "Missing connection parameters" });
+    }
     try {
         const testConn = await mariadb.createConnection({ host, port, user, password, database });
         await testConn.query("SELECT 1");
@@ -111,6 +114,67 @@ app.post("/api/checkMDBConnection", async (req, res) => {
         res.status(500).json({ success: false, message: "Database connection failed." });
     }
 });
+
+
+app.get("/api/fetchTable", async (req, res) => {
+    const { tableName } = req.query;
+    if (!tableName || tableName === "") {
+        return res.status(400).json({ error: "Missing statement" });
+    }
+    try {
+        const rows = await fetchTable(tableName);
+        res.json(rows);
+    } catch (error) {
+        console.error("❌ Error fetching table:", error);
+        res.status(500).json({ error: "Failed to fetch table data" });
+    }
+});
+
+app.post("/api/addToTable", async (req, res) => {
+    const { tableName, data } = req.body;
+
+    if (!tableName || !data) {
+        return res.status(400).json({ error: "Missing statements" });
+    }
+    try {
+        await addToTable(tableName, data);
+        res.json({ success: true });
+    } catch (error) {
+        console.error("❌ Error adding to table:", error);
+        res.status(500).json({ error: "Failed to add data to table" });
+    }
+}
+);
+app.post("/api/deleteFromTable", async (req, res) => {
+    const { tableName, parameter, value } = req.body;
+
+    if (!tableName || !parameter || value === undefined) {
+        return res.status(400).json({ error: "Missing tableName, parameter, or value" });
+    }
+    try {
+        await deleteFromTable(tableName, parameter, value);
+        res.json({ success: true });
+    } catch (error) {
+        console.error("❌ Error deleting from table:", error);
+        res.status(500).json({ error: "Failed to delete data from table" });
+    }
+}
+);
+app.post("/api/updateTable", async (req, res) => {
+    const { tableName, conditions, variableChange } = req.body;
+
+    if (!tableName || !conditions || !variableChange) {
+        return res.status(400).json({ error: "Missing tableName, conditions, or variableChange" });
+    }
+    try {
+        await updateTable(tableName, conditions, variableChange);
+        res.json({ success: true });
+    } catch (error) {
+        console.error("❌ Error updating table:", error);
+        res.status(500).json({ error: "Failed to update data in table" });
+    }
+}
+);
 
 
 app.listen(3000, () => {
