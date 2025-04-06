@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
 
@@ -14,7 +15,8 @@
   <meta property="og:site_name" content="bpmn-js-token-simulation demo" />
   <meta property="og:title" content="BPMN Token Simulation Demo" />
   <meta property="og:url" content="https://bpmn-io.github.io/bpmn-js-token-simulation/index.html" />
-  <meta property="og:description" content="Simulate your BPMN diagrams with bpmn-js-token-simulation. Understand and learn BPMN execution semantics one token at a time." />
+  <meta property="og:description"
+    content="Simulate your BPMN diagrams with bpmn-js-token-simulation. Understand and learn BPMN execution semantics one token at a time." />
   <meta property="og:image" content="https://bpmn-io.github.io/bpmn-js-token-simulation/screenshot.png" />
 
   <style>
@@ -40,17 +42,98 @@
       display: inline-block;
       margin: 10px;
     }
+
+    .status-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-left: 5px;
+      border-radius: 50%;
+      background-color: red;
+      /* Default to red */
+    }
+
+    .connected {
+      background-color: green;
+    }
+
+    form {
+      margin-bottom: 10px;
+    }
   </style>
 </head>
+
 <body>
   <h1>bpmn-js-token-simulation</h1>
 
   <p>
-    A token simulation extension for <a href="https://github.com/bpmn-io/bpmn-js">bpmn-js</a>. Check out the project <a href="https://github.com/bpmn-io/bpmn-js-token-simulation">on GitHub</a>.
+    A token simulation extension for <a href="https://github.com/bpmn-io/bpmn-js">bpmn-js</a>. Check out the project <a
+      href="https://github.com/bpmn-io/bpmn-js-token-simulation">on GitHub</a>.
   </p>
 
   <p style="margin-top: 3em">
     <a class="link" href="viewer.html">Open Viewer</a> or <a class="link" href="modeler.html">Open Modeler</a>
   </p>
+  <h2> Connect to Database</h2>
+  <form id="db-login-form" style="display: flex; flex-direction: column; width: 250px;">
+    <input type="text" id="host" placeholder="Host" required />
+    <input type="number" id="port" placeholder="Port" value="3306" required />
+    <input type="text" id="user" placeholder="User" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <input type="text" id="database" placeholder="Database" required />
+    <button type="submit">Connect</button>
+  </form>
+
+  <p>
+    Database Status:
+    <span id="db-indicator" class="status-dot"></span>
+  </p>
+  <p id="db-status" style="color: red;"></p>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      function updateStatus(connected) {
+        const indicator = document.getElementById('db-indicator');
+        if (connected) {
+          indicator.classList.add('connected');
+        } else {
+          indicator.classList.remove('connected');
+        }
+      }
+
+
+      const form = document.getElementById('db-login-form');
+      const status = document.getElementById('db-status');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const host = document.getElementById('host').value;
+        const port = parseInt(document.getElementById('port').value);
+        const user = document.getElementById('user').value;
+        const password = document.getElementById('password').value;
+        const database = document.getElementById('database').value;
+
+        const res = await fetch('http://localhost:3000/api/checkMDBConnection', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ host, port, user, password, database })
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+          updateStatus(true);
+          status.innerText = '✅ Connected successfully!';
+          status.style.color = 'green';
+        } else {
+          status.style.color = 'red';
+          updateStatus(false);
+          status.innerText = '❌ Failed to connect to database.';
+        }
+      });
+    });
+  </script>
 </body>
+
 </html>

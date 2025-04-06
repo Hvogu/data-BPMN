@@ -2,33 +2,44 @@ const mariadb = require('mariadb');
 const { col } = require('sequelize');
 
 
+let pool = null;
+// const pool = mariadb.createPool({
+//     host: 'localhost',       // Corrected: Only the host (without port and DB name)
+//     port: 3306,              // Port is specified separately
+//     user: 'root',            // Your MariaDB username
+//     password: 'bananjesper33', // Your MariaDB password
+//     database: 'jespersgym', // Your database name
+//     connectionLimit: 10,     // Increased connection limit
+//     acquireTimeout: 20000,   // Increased timeout (20 sec)
 
-const pool = mariadb.createPool({
-    host: 'localhost',       // Corrected: Only the host (without port and DB name)
-    port: 3306,              // Port is specified separately
-    user: 'root',            // Your MariaDB username
-    password: 'bananjesper33', // Your MariaDB password
-    database: 'jespersgym', // Your database name
-    connectionLimit: 10,     // Increased connection limit
-    acquireTimeout: 20000,   // Increased timeout (20 sec)
-});
+// });
+console.log("Connecting to MariaDB...")
 
-
-
-
-async function testConnection() {
-    let conn;
-    try {
-        conn = await pool.getConnection();
-        console.log("✅ Successfully connected to MariaDB!");
-        const rows = await conn.query("SELECT NOW() as time");
-        console.log("Current Time:", rows[0].time);
-    } catch (err) {
-        console.error("❌ Database connection error:", err);
-    } finally {
-        if (conn) conn.release(); // Release connection back to pool
-    }
+function createMDBPool(host, port, user, password, database) {
+    pool = mariadb.createPool({
+        host: host,
+        port: port,
+        user: user,
+        password: password,
+        database: database,
+        connectionLimit: 10, // Connection limit
+        acquireTimeout: 20000 // Timeout in milliseconds
+    });
+    console.log("Connected to MariaDB!");
 }
+
+function getPool() {
+    if (!pool) {
+        throw new Error("❌ Pool has not been created yet. Call createPool() first.");
+    }
+    return pool; // Return the pool object for use in other modules
+}
+
+
+
+
+
+
 
 async function fetchTable(tableName) {
     let conn;
@@ -45,22 +56,7 @@ async function fetchTable(tableName) {
     }
 }
 
-async function addEmployee(name, email, date_of_birth, position) {
-    let conn;
-    try {
-        conn = await pool.getConnection(); // Get a connection
-        const query = "INSERT INTO employee (name, email, date_of_birth, position) VALUES (?, ?, ?, ?)";
-        const result = await conn.query(query, [name, email, date_of_birth, position]);
 
-        console.log(" Employee Added Successfully! Inserted ID:", result.insertId);
-        return { success: true, id: result.insertId };
-    } catch (err) {
-        console.error(" Error inserting employee:", err);
-        return { success: false, error: err.message };
-    } finally {
-        if (conn) conn.release(); // Release the connection
-    }
-}
 
 
 
@@ -310,13 +306,14 @@ async function updateTable(tableName, conditions, variableChange) {
 
 
 
-const conditions = ["Capacity>100", "Capacity<80", `Location="Pine Street"`]
-const variableChange = [[`Location="Main Street"`, "Capacity=1000"], [`Location="Jesper Street"`, "Capacity=802"], [`Location="Main Street"`, "Capacity=200"]]
+// const conditions = ["Capacity>100", "Capacity<80", `Location="Pine Street"`]
+// const variableChange = [[`Location="Main Street"`, "Capacity=1000"], [`Location="Jesper Street"`, "Capacity=802"], [`Location="Main Street"`, "Capacity=200"]]
 // const variableChange = [["Location=Main Street", "Capacity=1000"], ["Location=Jesper Street", "Capacity=802"], [`Location="Main Street"`, "Capacity=200"], [`Location="Else Street"`, "Capacity=400"]];
-updateTable("Center", conditions, variableChange);
+// updateTable("Center", conditions, variableChange);
 
 module.exports = {
-    pool,
+    getPool,
+    createMDBPool,
     updateTable,
     deleteFromTable,
     addToTable,

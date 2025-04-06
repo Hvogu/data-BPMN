@@ -1,4 +1,4 @@
-const { pool, updateTable,
+const { getPool, createMDBPool, updateTable,
     deleteFromTable,
     addToTable,
     fetchTable } = require('./db'); // Import MariaDB connection
@@ -9,6 +9,7 @@ const cors = require('cors');
 const path = require('path');
 const { forEach } = require('min-dash');
 const { get } = require('http');
+const mariadb = require('mariadb');
 
 
 const newEmployee = {
@@ -28,7 +29,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'NewWindowsHTML')));
 
 
@@ -52,6 +53,7 @@ app.get('/erd', (req, res) => {
 app.get('/api/allTables', async (req, res) => {
     let conn;
     try {
+        const pool = getPool(); // Get the connection pool
         conn = await pool.getConnection();
         const dbResult = await conn.query("SELECT DATABASE() AS db");
         const dbName = dbResult[0].db;
@@ -74,13 +76,39 @@ app.get('/api/allTables', async (req, res) => {
 app.get('/api/table/:name', async (req, res) => {
     const tableName = req.params.name;
     try {
+        const pool = getPool(); // Get the connection pool
         const conn = await pool.getConnection();
         const rows = await conn.query(`SELECT * FROM \`${tableName}\``);
         conn.release();
-        res.json(rows);
+        res.json(safeJson(rows));
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to fetch table data' });
+    }
+});
+function safeJson(data) {
+    return JSON.parse(JSON.stringify(data, (_, v) =>
+        typeof v === 'bigint' ? v.toString() : v
+    ));
+}
+
+
+app.post("/api/checkMDBConnection", async (req, res) => {
+    const { host, port, user, password, database } = req.body;
+
+    try {
+        const testConn = await mariadb.createConnection({ host, port, user, password, database });
+        await testConn.query("SELECT 1");
+        await testConn.end();
+
+        // ✅ Connection test passed, now create actual pool
+        createMDBPool(host, port, user, password, database);
+
+        res.json({ success: true });
+
+    } catch (error) {
+        console.error("❌ Connection error:", error);
+        res.status(500).json({ success: false, message: "Database connection failed." });
     }
 });
 
