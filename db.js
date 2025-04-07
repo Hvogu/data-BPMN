@@ -159,6 +159,7 @@ async function getPrimaryKey(tableName) {
         if (conn) conn.release(); // Release the connection
     }
 }
+
 function columnPartOfPrimaryKey(column, primaryKey) {
     for (let i = 0; i < primaryKey.length; i++) {
         if (primaryKey[i].primaryKey === column) {
@@ -167,31 +168,31 @@ function columnPartOfPrimaryKey(column, primaryKey) {
     }
     return false;
 }
+
 async function createProc(tableName, key, conditions, variableChange) {
     const columnNamesAndTypes = await getTableColumns(tableName)
-    let proc = "DROP PROCEDURE IF EXISTS UPDATE \n" + "CREATE PROCEDURE BulkUpdate() \n" + "BEGIN \n"
+    let proc = "DROP PROCEDURE IF EXISTS BulkUpdate; \n" + "DELIMITER |\n" +"CREATE PROCEDURE BulkUpdate() \n" + "BEGIN \n"
     //declaring local variables
     proc += "DECLARE done INT DEFAULT FALSE;\n"
     columnNamesAndTypes.forEach(({ column, type }) => {
         proc += "DECLARE row_" + column + " " + type + ";\n"
     })
 
-    proc += "DECLARE curs CURSOR FOR \n SELECT"
+    proc += "\nDECLARE curs CURSOR FOR SELECT"
     columnNamesAndTypes.forEach(({ column, type }) => {
         proc += " " + column + ", "
     });
     proc = proc.slice(0, -2) // Remove the last comma and space
-    proc += " \n"
-    proc += "FROM " + tableName + " ORDER BY "
+    proc += " FROM " + tableName + " ORDER BY "
     key.forEach(({ primaryKey, type }) => {
         proc += primaryKey + ", "
     })
     proc = proc.slice(0, -2) // Remove the last comma and space
     proc += ";\n"
 
-    proc += "DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;\n OPEN curs;\n"
+    proc += "\nDECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;\nOPEN curs;\n"
 
-    proc += "read_loop: LOOP\n"
+    proc += "\nread_loop: LOOP\n"
     proc += "FETCH curs INTO "
     columnNamesAndTypes.forEach(({ column, type }) => {
         proc += "row_" + column + ", "
@@ -204,9 +205,7 @@ async function createProc(tableName, key, conditions, variableChange) {
 
 
     //making the case statement(s)
-    proc += "CASE \n"
-
-    //making a case for each column in the row
+    proc += "\nCASE \n"
 
     for (let j = 0; j < conditions.length; j++) {
         //checking conditions for each column in a row one at a time
@@ -217,10 +216,9 @@ async function createProc(tableName, key, conditions, variableChange) {
         proc = proc.slice(0, -2) // Remove the last comma and space
         proc += ") ON DUPLICATE KEY UPDATE "
         inputIndex = 0;
-        for (let i = 0; i < columnNamesAndTypes.length; i++) {
+        for (let i = 0; i < variableChange[j].length; i++) {
             if (columnPartOfPrimaryKey(columnNamesAndTypes[i].column, key)) {
-                proc += columnNamesAndTypes[i].column + " = row_" + columnNamesAndTypes[i].column + ", "
-
+                continue;
             } else {
                 proc += variableChange[j][inputIndex] + ", "
                 inputIndex++;
@@ -263,8 +261,8 @@ async function createProc(tableName, key, conditions, variableChange) {
         columnNamesAndTypes.forEach(({ column, type }) => {
             proc += "row_" + column + ", "
         });
-        proc = proc.slice(0, -2) // Remove the last comma and space
-        ") ON DUPLICATE KEY UPDATE "
+        proc = proc.slice(0, -2); // Remove the last comma and space
+        proc += ") ON DUPLICATE KEY UPDATE "
         for (let i = 0; i < columnNamesAndTypes.length; i++) {
 
             proc += columnNamesAndTypes[i].column + " = row_" + columnNamesAndTypes[i].column + ", "
@@ -279,7 +277,8 @@ async function createProc(tableName, key, conditions, variableChange) {
     proc += "END LOOP;\n"
     proc += "CLOSE curs;\n"
 
-    proc += "\n" + "END | \n "
+    proc += "\n" + "END | \n"
+    proc += "DELIMITER ;\n"
     return proc;
 }
 
@@ -288,8 +287,8 @@ async function createProc(tableName, key, conditions, variableChange) {
 async function updateTable(tableName, conditions, variableChange) {
     let conn;
     try {
-        const primaryKey = await getPrimaryKey(tableName)
-        const proc = await createProc(tableName, primaryKey, conditions, variableChange)
+        const primaryKey = await getPrimaryKey(tableName);
+        const proc = await createProc(tableName, primaryKey, conditions, variableChange);
         console.log(proc);
         conn = await pool.getConnection(); // Get a connection
         await conn.query(proc); // Execute the query

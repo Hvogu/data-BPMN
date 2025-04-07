@@ -160,6 +160,7 @@ app.post("/api/deleteFromTable", async (req, res) => {
     }
 }
 );
+
 app.post("/api/updateTable", async (req, res) => {
     const { tableName, conditions, variableChange } = req.body;
 
