@@ -14,6 +14,9 @@ import messageService from './messageService';
 import { evalPreCondition, executeEffects } from '../../lib/custom/parsers/effExuecute.js'
 
 import getAll from "../../lib/custom/parsers/finalPreEff.js";
+import getTextBoxes from '../../lib/custom/parser2/textBox.js';
+import handleEffect from '../../lib/custom/parser2/effect.js';
+import handlePreCon from '../../lib/custom/parser2/preCon.js';
 
 import { processVar, setPro } from '../../lib/custom/parsers/processVar.js';
 import { db, setCol, setDb, setTables, col, tables, tableData, extractTableAttributes } from '../../lib/custom/parsers/db.js';
@@ -330,10 +333,10 @@ function downloadDiagram() {
 
 
   for (var i = 0; i < dataTask_list.length; i++) {
-    let text1 = document.getElementById(dataTask_list[i] + 'pre').value
-    let text2 = document.getElementById(dataTask_list[i] + 'eff').value
+    let text1 = document.getElementById(dataTask_list[i] + 'sql').value
+
     console.log(text1)
-    updateQueryFieldById(dataTask_list[i].slice(0, -4), text1, text2);
+    updateQueryFieldById(dataTask_list[i].slice(0, -4), text1);
 
 
   }
@@ -678,12 +681,27 @@ var datataskTriggered = false
 
 var dataTask_list = [];
 
+function extractPreAndEffect(input) {
+  const pattern = /^when\s+(.*?)\s+then\s+(.*)$/i;
+  const match = input.match(pattern);
+
+  if (match) {
+    const pre = match[1].trim();
+    const effect = match[2].trim();
+    return { pre, effect };
+  } else {
+    // No "when ... then" pattern, treat entire string as the effect
+    return { pre: undefined, effect: input.trim() };
+  }
+}
+
+
 function createDropdown(param, db) {
   const dropdown = document.createElement('div');
   dropdown.className = 'dynamicDropdown';
   dropdown.id = param + 'drop'
-  getAll(dropdown, col, tables, processVar, db)
-
+  //getAll(dropdown, col, tables, processVar, db)
+  getTextBoxes(dropdown)
 
 
   const submitButton = document.createElement('button');
@@ -713,6 +731,24 @@ function createDropdown(param, db) {
       });
       console.log(dropdown.pre);
       console.log(dropdown.eff);
+      console.log("dropdownsql " + dropdown.sqlEditor.value);
+
+      const sql = extractPreAndEffect(dropdown.sqlEditor.value);
+      console.log("preCon: " + sql.pre);
+      console.log("Effect: " + sql.effect);
+      //vores pis kode
+      if (sql.pre == undefined || handlePreCon(sql.pre)) {
+
+        handleEffect(sql.effect)
+      }
+
+
+
+
+
+
+
+      //hans pis kode 
       let n;
       if (dropdown.pre != undefined && dropdown.eff != undefined) {
         if (dropdown.pre.isPared && dropdown.eff.isPared) {
