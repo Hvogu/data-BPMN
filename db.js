@@ -22,6 +22,7 @@ function createMDBPool(host, port, user, password, database) {
         user: user,
         password: password,
         database: database,
+        multipleStatements: true, // Allow multiple statements in a single query
         connectionLimit: 10, // Connection limit
         acquireTimeout: 20000 // Timeout in milliseconds
     });
@@ -169,9 +170,27 @@ function columnPartOfPrimaryKey(column, primaryKey) {
     return false;
 }
 
+function insertText(tableName, columnNamesAndTypes) {
+    // Construct the SQL INSERT statement dynamically
+    proc = " INSERT INTO " + tableName + "("
+    columnNamesAndTypes.forEach(({ column, type }) => {
+        proc += column + ", "
+    });
+    proc = proc.slice(0, -2); // Remove the last comma and space
+    proc += ")"
+    proc += " VALUES ("
+    columnNamesAndTypes.forEach(({ column, type }) => {
+        proc += "row_" + column + ", "
+    });
+    proc = proc.slice(0, -2); // Remove the last comma and space
+    proc += ") ON DUPLICATE KEY UPDATE "
+
+    return proc;
+}
+
 async function createProc(tableName, key, conditions, variableChange) {
     const columnNamesAndTypes = await getTableColumns(tableName)
-    let proc = "DROP PROCEDURE IF EXISTS BulkUpdate; \n" + "DELIMITER |\n" + "CREATE PROCEDURE BulkUpdate() \n" + "BEGIN \n"
+    let proc = "DROP PROCEDURE IF EXISTS BulkUpdate; \n" + "CREATE PROCEDURE BulkUpdate() \n" + "BEGIN \n"
     //declaring local variables
     proc += "DECLARE done INT DEFAULT FALSE;\n"
     columnNamesAndTypes.forEach(({ column, type }) => {
@@ -182,12 +201,12 @@ async function createProc(tableName, key, conditions, variableChange) {
     columnNamesAndTypes.forEach(({ column, type }) => {
         proc += " " + column + ", "
     });
-    proc = proc.slice(0, -2) // Remove the last comma and space
+    proc = proc.slice(0, -2); // Remove the last comma and space
     proc += " FROM " + tableName + " ORDER BY "
     key.forEach(({ primaryKey, type }) => {
         proc += primaryKey + ", "
     })
-    proc = proc.slice(0, -2) // Remove the last comma and space
+    proc = proc.slice(0, -2);
     proc += ";\n"
 
     proc += "\nDECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;\nOPEN curs;\n"
@@ -197,7 +216,7 @@ async function createProc(tableName, key, conditions, variableChange) {
     columnNamesAndTypes.forEach(({ column, type }) => {
         proc += "row_" + column + ", "
     });
-    proc = proc.slice(0, -2) // Remove the last comma and space
+    proc = proc.slice(0, -2);
     proc += ";\n"
     proc += "IF done THEN\n"
     proc += "LEAVE read_loop;\n"
@@ -209,23 +228,8 @@ async function createProc(tableName, key, conditions, variableChange) {
 
     for (let j = 0; j < conditions.length; j++) {
         //checking conditions for each column in a row one at a time
-        proc += "WHEN " + conditions[j] + " THEN INSERT INTO " + tableName + " VALUES ("
-        columnNamesAndTypes.forEach(({ column, type }) => {
-            proc += "row_" + column + ", "
-        });
-        proc = proc.slice(0, -2) // Remove the last comma and space
-        proc += ") ON DUPLICATE KEY UPDATE "
-        inputIndex = 0;
-        for (let i = 0; i < variableChange[j].length; i++) {
-            if (columnPartOfPrimaryKey(columnNamesAndTypes[i].column, key)) {
-                continue;
-            } else {
-                proc += variableChange[j][inputIndex] + ", "
-                inputIndex++;
-            }
-
-        }
-        proc = proc.slice(0, -2) // Remove the last comma and space
+        proc += "WHEN " + conditions[j] + " THEN" + insertText(tableName, columnNamesAndTypes);
+        proc += variableChange[j]; // Remove the last comma and space
         proc += ";\n"
 
         // + variableChange[j][i] + " \n"
@@ -236,39 +240,18 @@ async function createProc(tableName, key, conditions, variableChange) {
     if (conditions.length < variableChange.length) {
         //if this is true that means an else statement is intended
 
-        proc += "ELSE INSERT INTO " + tableName + " VALUES ("
-        columnNamesAndTypes.forEach(({ column, type }) => {
-            proc += "row_" + column + ", "
-        });
-        proc = proc.slice(0, -2) // Remove the last comma and space
-        proc += ") ON DUPLICATE KEY UPDATE "
+        proc += "ELSE" + insertText(tableName, columnNamesAndTypes);
 
-        let inputIndex = 0;
-        for (let i = 0; i < columnNamesAndTypes.length; i++) {
-            if (columnPartOfPrimaryKey(columnNamesAndTypes[i].column, key)) {
-                proc += columnNamesAndTypes[i].column + " = row_" + columnNamesAndTypes[i].column + ", "
-
-            } else {
-                proc += variableChange[conditions.length][inputIndex] + ", "
-                inputIndex++;
-            }
-        }
-        proc = proc.slice(0, -2) // Remove the last comma and space
-
+        proc += variableChange[conditions.length];
     } else {
 
-        proc += "ELSE INSERT INTO " + tableName + " VALUES ("
-        columnNamesAndTypes.forEach(({ column, type }) => {
-            proc += "row_" + column + ", "
-        });
-        proc = proc.slice(0, -2); // Remove the last comma and space
-        proc += ") ON DUPLICATE KEY UPDATE "
+        proc += "ELSE" + insertText(tableName, columnNamesAndTypes);
         for (let i = 0; i < columnNamesAndTypes.length; i++) {
 
             proc += columnNamesAndTypes[i].column + " = row_" + columnNamesAndTypes[i].column + ", "
 
         }
-        proc = proc.slice(0, -2) // Remove the last comma and space
+        proc = proc.slice(0, -2); // Remove the last comma and space
 
     }
     proc += ";\n"
@@ -277,8 +260,8 @@ async function createProc(tableName, key, conditions, variableChange) {
     proc += "END LOOP;\n"
     proc += "CLOSE curs;\n"
 
-    proc += "\n" + "END | \n"
-    proc += "DELIMITER ;\n"
+    proc += "\nEND ; \n"
+    proc += "CALL BulkUpdate();\n"
     return proc;
 }
 
@@ -292,7 +275,7 @@ async function updateTable(tableName, conditions, variableChange) {
         console.log(proc);
         conn = await pool.getConnection(); // Get a connection
         await conn.query(proc); // Execute the query
-        console.log("Procedure created successfully.");
+        console.log("Procedure created and table updated successfully.");
 
     } catch (error) {
         console.error(` Error creating procedure for ${tableName}:`, error);
