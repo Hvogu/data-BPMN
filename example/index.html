@@ -57,14 +57,43 @@
       background-color: green;
     }
 
-    form {
+    .form {
       margin-bottom: 10px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background-color: #ff4d4f;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.success {
+      background-color: #28a745;
+    }
+
+    .toast.error {
+      background-color: #dc3545;
     }
   </style>
 </head>
 
 <body>
   <h1>bpmn-js-token-simulation</h1>
+
 
   <p>
     A token simulation extension for <a href="https://github.com/bpmn-io/bpmn-js">bpmn-js</a>. Check out the project <a
@@ -89,6 +118,7 @@
     <span id="db-indicator" class="status-dot"></span>
   </p>
   <p id="db-status" style="color: red;"></p>
+  <div id="toast" class="toast hidden"></div>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -99,6 +129,16 @@
         } else {
           indicator.classList.remove('connected');
         }
+      }
+
+      function showToast(message, type = "error") {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.className = `toast show ${type}`;
+
+        setTimeout(() => {
+          toast.className = "toast hidden";
+        }, 3000);
       }
 
 
@@ -114,23 +154,35 @@
         const password = document.getElementById('password').value;
         const database = document.getElementById('database').value;
 
-        const res = await fetch('http://localhost:3000/api/checkMDBConnection', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ host, port, user, password, database })
-        });
+        try {
+          const res = await fetch('http://localhost:3000/api/checkMDBConnection', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ host, port, user, password, database })
+          });
 
-        const result = await res.json();
+          const result = await res.json();
 
-        if (result.success) {
-          updateStatus(true);
-          status.innerText = '✅ Connected successfully!';
-          status.style.color = 'green';
-        } else {
-          status.style.color = 'red';
+          if (result.success) {
+            updateStatus(true);
+            status.innerText = '✅ Connected successfully!';
+            status.style.color = 'green';
+            showToast('Connected to database successfully!', 'success');
+          } else {
+            status.style.color = 'red';
+            updateStatus(false);
+            status.innerText = '❌ Failed to connect to database.';
+            showToast('Failed to connect to database', 'error');
+          }
+
+        } catch (error) {
           updateStatus(false);
-          status.innerText = '❌ Failed to connect to database.';
+          status.innerText = '❌ Error occurred while connecting to database.';
+          status.style.color = 'red';
+          showToast(error.message, 'error');
         }
+
+
       });
     });
   </script>

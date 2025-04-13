@@ -68,13 +68,13 @@ async function addToTable(tableName, data) {
         conn = await pool.getConnection(); // Get a connection
 
         // Extract column names and values dynamically
-        const columns = Object.keys(data).join(', '); // Convert object keys to column names
-        const placeholders = Object.keys(data).map(() => '?').join(', '); // Generate placeholders (?,?,?,?)
-        const values = Object.values(data); // Extract values dynamically
+        // const columns = Object.keys(data).join(', '); // Convert object keys to column names
+        // const placeholders = Object.keys(data).map(() => '?').join(', '); // Generate placeholders (?,?,?,?)
+        // const values = Object.values(data); // Extract values dynamically
 
         // Construct the SQL query
-        const query = `INSERT INTO ${tableName} (${columns}) VALUES (${placeholders})`;
-        const result = await conn.query(query, values);
+        const query = `INSERT INTO ${tableName} VALUES (${data})`;
+        const result = await conn.query(query);
         console.log("success");
 
         return { success: true, id: result.insertId };
@@ -87,13 +87,13 @@ async function addToTable(tableName, data) {
 }
 
 
-async function deleteFromTable(tableName, parameter, value) {
+async function deleteFromTable(tableName, parameter) {
     let conn;
     try {
 
         conn = await pool.getConnection(); // Get a connection
-        const query = `DELETE FROM ${tableName} WHERE ${parameter} = ?`;
-        const result = await conn.query(query, [value]); // Execute the query
+        const query = `DELETE FROM ${tableName} WHERE ${parameter}`;
+        const result = await conn.query(query); // Execute the query
 
         console.log(` Deleted ${result.affectedRows} rows from ${tableName}`);
         return { success: true, rowsDeleted: result.affectedRows };
@@ -171,7 +171,7 @@ function columnPartOfPrimaryKey(column, primaryKey) {
 
 async function createProc(tableName, key, conditions, variableChange) {
     const columnNamesAndTypes = await getTableColumns(tableName)
-    let proc = "DROP PROCEDURE IF EXISTS BulkUpdate; \n" + "DELIMITER |\n" +"CREATE PROCEDURE BulkUpdate() \n" + "BEGIN \n"
+    let proc = "DROP PROCEDURE IF EXISTS BulkUpdate; \n" + "DELIMITER |\n" + "CREATE PROCEDURE BulkUpdate() \n" + "BEGIN \n"
     //declaring local variables
     proc += "DECLARE done INT DEFAULT FALSE;\n"
     columnNamesAndTypes.forEach(({ column, type }) => {
