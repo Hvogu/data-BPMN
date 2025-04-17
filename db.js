@@ -68,13 +68,15 @@ async function addToTable(tableName, data) {
     try {
         conn = await pool.getConnection(); // Get a connection
 
-        // Extract column names and values dynamically
-        // const columns = Object.keys(data).join(', '); // Convert object keys to column names
-        // const placeholders = Object.keys(data).map(() => '?').join(', '); // Generate placeholders (?,?,?,?)
-        // const values = Object.values(data); // Extract values dynamically
+        const keys = Object.keys(data);                  // ['Location', 'Capacity']
+        const values = Object.values(data);              // ['Idavej', 108]
+        console.log("keys:", keys);
+        console.log("values:", values);
+        const valueString = values.map(v =>
+            typeof v === 'string' ? `'${v}'` : v
+        ).join(', ');
 
-        // Construct the SQL query
-        const query = `INSERT INTO ${tableName} VALUES (${data})`;
+        const query = `INSERT INTO ${tableName} (${keys.join(', ')}) VALUES (${valueString})`;
         const result = await conn.query(query);
         console.log("success");
 
@@ -88,12 +90,14 @@ async function addToTable(tableName, data) {
 }
 
 
-async function deleteFromTable(tableName, parameter) {
+async function deleteFromTable(tableName, data) {
     let conn;
     try {
 
+        const commaReplacedWithAnd = data.replace(/,\s*/g, ' AND ');
+
         conn = await pool.getConnection(); // Get a connection
-        const query = `DELETE FROM ${tableName} WHERE ${parameter}`;
+        const query = `DELETE FROM ${tableName} WHERE ${commaReplacedWithAnd}`;
         const result = await conn.query(query); // Execute the query
 
         console.log(` Deleted ${result.affectedRows} rows from ${tableName}`);
@@ -188,7 +192,18 @@ function insertText(tableName, columnNamesAndTypes) {
     return proc;
 }
 
-async function createProc(tableName, key, conditions, variableChange) {
+function replaceWithRowVars(condition, columns) {
+    let modified = condition;
+    columns.forEach(({ column }) => {
+        // Only replace whole words (not substrings)
+        const regex = new RegExp(`\\b${column}\\b`, 'g');
+        modified = modified.replace(regex, `row_${column}`);
+    });
+    return modified;
+}
+
+
+async function createProc(tableName, key, conditions, variableChanges) {
     const columnNamesAndTypes = await getTableColumns(tableName)
     let proc = "DROP PROCEDURE IF EXISTS BulkUpdate; \n" + "CREATE PROCEDURE BulkUpdate() \n" + "BEGIN \n"
     //declaring local variables
@@ -228,8 +243,8 @@ async function createProc(tableName, key, conditions, variableChange) {
 
     for (let j = 0; j < conditions.length; j++) {
         //checking conditions for each column in a row one at a time
-        proc += "WHEN " + conditions[j] + " THEN" + insertText(tableName, columnNamesAndTypes);
-        proc += variableChange[j]; // Remove the last comma and space
+        proc += "WHEN " + replaceWithRowVars(conditions[j], columnNamesAndTypes) + " THEN" + insertText(tableName, columnNamesAndTypes);
+        proc += variableChanges[j]; // Remove the last comma and space
         proc += ";\n"
 
         // + variableChange[j][i] + " \n"
@@ -237,12 +252,12 @@ async function createProc(tableName, key, conditions, variableChange) {
     }
 
 
-    if (conditions.length < variableChange.length) {
+    if (conditions.length < variableChanges.length) {
         //if this is true that means an else statement is intended
 
         proc += "ELSE" + insertText(tableName, columnNamesAndTypes);
 
-        proc += variableChange[conditions.length];
+        proc += variableChanges[conditions.length];
     } else {
 
         proc += "ELSE" + insertText(tableName, columnNamesAndTypes);
@@ -267,11 +282,11 @@ async function createProc(tableName, key, conditions, variableChange) {
 
 
 
-async function updateTable(tableName, conditions, variableChange) {
+async function updateTable(tableName, conditions, variableChanges) {
     let conn;
     try {
         const primaryKey = await getPrimaryKey(tableName);
-        const proc = await createProc(tableName, primaryKey, conditions, variableChange);
+        const proc = await createProc(tableName, primaryKey, conditions, variableChanges);
         console.log(proc);
         conn = await pool.getConnection(); // Get a connection
         await conn.query(proc); // Execute the query
@@ -292,6 +307,7 @@ async function updateTable(tableName, conditions, variableChange) {
 // const variableChange = [[`Location="Main Street"`, "Capacity=1000"], [`Location="Jesper Street"`, "Capacity=802"], [`Location="Main Street"`, "Capacity=200"]]
 // const variableChange = [["Location=Main Street", "Capacity=1000"], ["Location=Jesper Street", "Capacity=802"], [`Location="Main Street"`, "Capacity=200"], [`Location="Else Street"`, "Capacity=400"]];
 // updateTable("Center", conditions, variableChange);
+
 
 module.exports = {
     getPool,

@@ -150,8 +150,14 @@ app.post("/api/addToTable", async (req, res) => {
         return res.status(400).json({ error: "Missing statements" });
     }
     try {
-        await addToTable(tableName, data);
-        res.json({ success: true });
+        const result = await addToTable(tableName, data);
+
+        if (result.success) {
+            res.json({ success: true });
+        } else {
+            res.status(400).json({ success: false, error: result.error });
+        }
+
     } catch (error) {
         console.error("❌ Error adding to table:", error);
         res.status(500).json({ error: "Failed to add data to table" });
@@ -159,14 +165,19 @@ app.post("/api/addToTable", async (req, res) => {
 }
 );
 app.post("/api/deleteFromTable", async (req, res) => {
-    const { tableName, parameter, value } = req.body;
+    const { tableName, data } = req.body;
 
-    if (!tableName || !parameter || value === undefined) {
+    if (!tableName || data === undefined) {
         return res.status(400).json({ error: "Missing tableName, parameter, or value" });
     }
     try {
-        await deleteFromTable(tableName, parameter, value);
-        res.json({ success: true });
+        result = await deleteFromTable(tableName, data);
+        if (result.success) {
+            res.json({ success: true });
+        } else {
+            res.status(400).json({ success: false, error: result.error });
+        }
+
     } catch (error) {
         console.error("❌ Error deleting from table:", error);
         res.status(500).json({ error: "Failed to delete data from table" });
@@ -175,13 +186,15 @@ app.post("/api/deleteFromTable", async (req, res) => {
 );
 
 app.post("/api/updateTable", async (req, res) => {
-    const { tableName, conditions, variableChange } = req.body;
-
-    if (!tableName || !conditions || !variableChange) {
+    const { tableName, conditions, variableChanges } = req.body;
+    console.log("tableName", tableName);
+    console.log("conditions", conditions);
+    console.log("variableChanges", variableChanges);
+    if (!tableName || !conditions || !variableChanges) {
         return res.status(400).json({ error: "Missing tableName, conditions, or variableChange" });
     }
     try {
-        await updateTable(tableName, conditions, variableChange);
+        await updateTable(tableName, conditions, variableChanges);
         res.json({ success: true });
     } catch (error) {
         console.error("❌ Error updating table:", error);
