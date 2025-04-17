@@ -115,6 +115,19 @@ app.post("/api/checkMDBConnection", async (req, res) => {
     }
 });
 
+app.get("/api/selQry", async (req, res) => {
+    const { tableNames, attributes } = req.query;
+    if (!tableNames || !attributes) { // Ensure both parameters are provided
+        return res.status(400).json({ error: "Missing tableNames or attributes" });
+    }
+    try {
+        const rows = await getPool().query(`SELECT ${attributes} FROM ${tableNames}`);
+        res.json(rows);
+    } catch (error) {
+        console.error("❌ Error fetching table:", error);
+        res.status(500).json({ error: "Failed to fetch table data" });
+    }
+});
 
 app.get("/api/fetchTable", async (req, res) => {
     const { tableName } = req.query;

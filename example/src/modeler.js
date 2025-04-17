@@ -17,6 +17,7 @@ import getAll from "../../lib/custom/parsers/finalPreEff.js";
 import getTextBoxes from '../../lib/custom/parser2/textBox.js';
 import handleEffect from '../../lib/custom/parser2/effect.js';
 import handlePreCon from '../../lib/custom/parser2/preCon.js';
+import { processVarChanger } from '../../lib/custom/parser2/varriableChanger.js';
 
 import { processVar, setPro } from '../../lib/custom/parsers/processVar.js';
 import { db, setCol, setDb, setTables, col, tables, tableData, extractTableAttributes } from '../../lib/custom/parsers/db.js';
@@ -153,6 +154,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     for (const variable of variables) {
       const match = variable.match(/#(\w+):\s*(string|number|\w+)/);
+      console.log(match)
       if (match) {
         const name = "#" + match[1];
         let value;
@@ -733,15 +735,22 @@ function createDropdown(param, db) {
       console.log(dropdown.eff);
       console.log("dropdownsql " + dropdown.sqlEditor.value);
 
-      const sql = extractPreAndEffect(dropdown.sqlEditor.value);
+      const processVarString = processVarChanger(dropdown.sqlEditor.value);
+      const sql = extractPreAndEffect(processVarString);
       console.log("preCon: " + sql.pre);
       console.log("Effect: " + sql.effect);
       //vores pis kode
-      if (sql.pre == undefined || handlePreCon(sql.pre)) {
-
-        handleEffect(sql.effect)
+      if (sql.pre != undefined) {
+        let preCon = await handlePreCon(sql.pre);
+        console.log(preCon.isTrue);
+        console.log(preCon.result[0]);
+        if (preCon.isTrue) {
+          handleEffect(sql.effect);
+        }
       }
-
+      else {
+        handleEffect(sql.effect);
+      }
 
 
 
