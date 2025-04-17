@@ -17,7 +17,7 @@ import getAll from "../../lib/custom/parsers/finalPreEff.js";
 import getTextBoxes from '../../lib/custom/parser2/textBox.js';
 import handleEffect from '../../lib/custom/parser2/effect.js';
 import handlePreCon from '../../lib/custom/parser2/preCon.js';
-import { processVarChanger } from '../../lib/custom/parser2/varriableChanger.js';
+import { VarChanger as varChanger } from '../../lib/custom/parser2/varriableChanger.js';
 
 import { processVar, setPro } from '../../lib/custom/parsers/processVar.js';
 import { db, setCol, setDb, setTables, col, tables, tableData, extractTableAttributes } from '../../lib/custom/parsers/db.js';
@@ -684,7 +684,7 @@ var datataskTriggered = false
 var dataTask_list = [];
 
 function extractPreAndEffect(input) {
-  const pattern = /^when\s+(.*?)\s+then\s+(.*)$/i;
+  const pattern = /^\s*when\s+(.*?)\s+then\s+(.*)$/i;
   const match = input.match(pattern);
 
   if (match) {
@@ -731,25 +731,31 @@ function createDropdown(param, db) {
           playPause.dispatchEvent(new Event('click'));
         }
       });
-      console.log(dropdown.pre);
-      console.log(dropdown.eff);
-      console.log("dropdownsql " + dropdown.sqlEditor.value);
+      console.log("dropdownsql: " + dropdown.sqlEditor.value);
 
-      const processVarString = processVarChanger(dropdown.sqlEditor.value);
-      const sql = extractPreAndEffect(processVarString);
+      const sql = extractPreAndEffect(dropdown.sqlEditor.value);
       console.log("preCon: " + sql.pre);
       console.log("Effect: " + sql.effect);
       //vores pis kode
       if (sql.pre != undefined) {
+        varChanger(sql.pre);
         let preCon = await handlePreCon(sql.pre);
         console.log(preCon.isTrue);
         console.log(preCon.result[0]);
         if (preCon.isTrue) {
-          handleEffect(sql.effect);
+          try {
+            handleEffect(sql.effect);
+          } catch (err) {
+            console.error(err)
+          }
         }
       }
       else {
-        handleEffect(sql.effect);
+        try {
+          handleEffect(sql.effect);
+        } catch (err) {
+          console.error(err)
+        }
       }
 
 
