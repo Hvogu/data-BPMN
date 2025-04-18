@@ -201,6 +201,11 @@ function replaceWithRowVars(condition, columns) {
     });
     return modified;
 }
+function rewriteSelfReferenceConditions(updateString) {
+    return updateString.replace(/(\b(\w+))=(\2\s*[\+\-\*\/]\s*\d+)/g, (match, full, col, expr) => {
+        return `${col}=row_${expr}`;
+    });
+}
 
 
 async function createProc(tableName, key, conditions, variableChanges) {
@@ -244,7 +249,7 @@ async function createProc(tableName, key, conditions, variableChanges) {
     for (let j = 0; j < conditions.length; j++) {
         //checking conditions for each column in a row one at a time
         proc += "WHEN " + replaceWithRowVars(conditions[j], columnNamesAndTypes) + " THEN" + insertText(tableName, columnNamesAndTypes);
-        proc += variableChanges[j]; // Remove the last comma and space
+        proc += rewriteSelfReferenceConditions(variableChanges[j]); // Remove the last comma and space
         proc += ";\n"
 
         // + variableChange[j][i] + " \n"
