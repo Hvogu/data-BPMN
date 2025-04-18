@@ -17,7 +17,7 @@ import getAll from "../../lib/custom/parsers/finalPreEff.js";
 import getTextBoxes from '../../lib/custom/parser2/textBox.js';
 import handleEffect from '../../lib/custom/parser2/effect.js';
 import handlePreCon from '../../lib/custom/parser2/preCon.js';
-import { VarChanger as varChanger } from '../../lib/custom/parser2/varriableChanger.js';
+import { processVarParser } from '../../lib/custom/parser2/varriableChanger.js';
 
 import { processVar, setPro } from '../../lib/custom/parsers/processVar.js';
 import { db, setCol, setDb, setTables, col, tables, tableData, extractTableAttributes } from '../../lib/custom/parsers/db.js';
@@ -738,10 +738,11 @@ function createDropdown(param, db) {
       console.log("Effect: " + sql.effect);
       //vores pis kode
       if (sql.pre != undefined) {
-        varChanger(sql.pre);
+        processVarParser(sql.pre);
         let preCon = await handlePreCon(sql.pre);
-        console.log(preCon.isTrue);
-        console.log(preCon.result[0]);
+        console.log(preCon);
+        try {console.log(preCon.isTrue);} catch (err) {console.error(err);}
+        console.log(preCon.result);
         if (preCon.isTrue) {
           try {
             handleEffect(sql.effect);
