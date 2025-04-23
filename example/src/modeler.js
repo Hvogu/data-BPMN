@@ -6,6 +6,7 @@ import AddExporter from '@bpmn-io/add-exporter';
 
 /* My Imports */
 import SimulationSupportModule from '../../lib/simulation-support';
+
 import customModule from '../../lib/custom';
 import taPackage from '../../ta.json';
 import data_store from '../../resources/data-store.js';
@@ -35,6 +36,7 @@ import fileOpen from 'file-open';
 import download from 'downloadjs';
 import exampleXML from '../resources/example.bpmn';
 import { has } from 'min-dash';
+import { RESET_SIMULATION_EVENT } from '../../lib/util/EventHelper.js';
 
 const url = new URL(window.location.href);
 const persistent = url.searchParams.has('p');
@@ -642,23 +644,29 @@ async function simulateProcess() {
     try {
       simCall = true;
       const result = await simulationSupport.elementEnter('ta:DataTask');
-
+      console.log('Simulation result:', result);
       if (!isRunning) {
         console.log('Operation cancelled');
         break; // Exit the loop if isRunning is false
       }
 
       const datatask = document.getElementById(`${result.element.id}drop`);
+      console.log("datatask:", datatask);
+      const textarea = document.getElementById(`${datatask.id}sql`);
+      console.log("textarea:", textarea);
+      console.log("textarea.value:", textarea.value);
 
 
-      if (!datatask.pre || !datatask.eff || !datatask.pre.isPared || !datatask.eff.isPared) {
-        alert('Preconditions and effects must both be parsed correctly.');
+      if (!textarea.value) {
+        alert('non empty SQL statement required');
         document.querySelector('.bts-toggle-mode').dispatchEvent(new Event('click'));
+        modeler.get('eventBus').fire(RESET_SIMULATION_EVENT);
       } else {
         const execute = document.getElementById(`${result.element.id}exe`);
         await execute.click();
         console.log('Button click event fully processed');
         console.log(result.element.id)
+
         simCall = false;
         // Additional actions to be performed after the button click event
       }
