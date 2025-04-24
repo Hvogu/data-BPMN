@@ -668,6 +668,13 @@ async function simulateProcess() {
         console.log(result.element.id)
 
         simCall = false;
+        console.log('Simulation completed successfully!');
+        modeler.get('eventBus').fire('tokenSimulation.simulator.trace', {
+          element: result.element,
+          scope: result.scope
+        });
+        console.log('Element exited successfully!');
+
         // Additional actions to be performed after the button click event
       }
     } catch (error) {
@@ -807,6 +814,7 @@ function createDropdown(param, db) {
           }
         }
       }
+
       datataskTriggered = false;
       resolve();
     });
