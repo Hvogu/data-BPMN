@@ -18,7 +18,7 @@ import getAll from "../../lib/custom/parsers/finalPreEff.js";
 import getTextBoxes from '../../lib/custom/parser2/textBox.js';
 import handleEffect from '../../lib/custom/parser2/effect.js';
 import handlePreCon from '../../lib/custom/parser2/preCon.js';
-import { VarChanger as varChanger } from '../../lib/custom/parser2/varriableChanger.js';
+import { processVarParser, inputVarParser, chooseSelRes } from '../../lib/custom/parser2/varriableChanger.js';
 
 import { processVar, setPro } from '../../lib/custom/parsers/processVar.js';
 import { db, setCol, setDb, setTables, col, tables, tableData, extractTableAttributes } from '../../lib/custom/parsers/db.js';
@@ -716,18 +716,16 @@ function extractPreAndEffect(input) {
 function createDropdown(param, db) {
   const dropdown = document.createElement('div');
   dropdown.className = 'dynamicDropdown';
-  dropdown.id = param + 'drop'
-  //getAll(dropdown, col, tables, processVar, db)
-  getTextBoxes(dropdown)
-
+  dropdown.id = param + 'drop';
+  getTextBoxes(dropdown);
 
   const submitButton = document.createElement('button');
   submitButton.textContent = 'Execute';
   submitButton.id = param + 'exe';
-  dataTask_list.push(param + 'drop')
-  console.log(submitButton.id)
+  dataTask_list.push(param + 'drop');
+  console.log(submitButton.id);
 
-  submitButton.addEventListener('click', async function () {
+  submitButton.addEventListener('click', async function() {
     return new Promise(async (resolve) => {
 
       while (datataskTriggered) {
@@ -746,20 +744,28 @@ function createDropdown(param, db) {
           playPause.dispatchEvent(new Event('click'));
         }
       });
-      console.log("dropdownsql: " + dropdown.sqlEditor.value);
 
-      const sql = extractPreAndEffect(dropdown.sqlEditor.value);
+      console.log("dropdownsql: " + dropdown.sqlEditor.value);
+      const textWithUserInput = await inputVarParser(dropdown.sqlEditor.value);
+      const sql = extractPreAndEffect(textWithUserInput);
       console.log("preCon: " + sql.pre);
       console.log("Effect: " + sql.effect);
+
       //vores pis kode
       if (sql.pre != undefined) {
-        varChanger(sql.pre);
+        sql.pre = processVarParser(sql.pre);
+        console.log(sql.pre);
         let preCon = await handlePreCon(sql.pre);
-        console.log(preCon.isTrue);
-        console.log(preCon.result[0]);
+        console.log(preCon);
+        try {console.log(preCon.isTrue);} catch (err) {console.error(err);}
+        console.log(preCon.result);
         if (preCon.isTrue) {
           try {
+            console.log(typeof sql.effect)
+            sql.effect = await chooseSelRes(sql.effect, preCon.result);
+            console.log(sql.effect)
             handleEffect(sql.effect);
+
           } catch (err) {
             console.error(err)
           }
@@ -820,10 +826,7 @@ function createDropdown(param, db) {
     });
   });
 
-
   dropdown.appendChild(submitButton);
-
-
 
   return dropdown;
 }
