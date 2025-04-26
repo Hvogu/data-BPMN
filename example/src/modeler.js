@@ -37,6 +37,7 @@ import download from 'downloadjs';
 import exampleXML from '../resources/example.bpmn';
 import { has } from 'min-dash';
 import { RESET_SIMULATION_EVENT } from '../../lib/util/EventHelper.js';
+import { event } from 'min-dom';
 
 const url = new URL(window.location.href);
 const persistent = url.searchParams.has('p');
@@ -719,6 +720,14 @@ function createDropdown(param, db) {
   dropdown.id = param + 'drop';
   getTextBoxes(dropdown);
 
+  dropdown.addEventListener('mousedown', function(event) {
+    event.stopPropagation();
+  });
+
+  dropdown.addEventListener('click', function(event) {
+    event.stopPropagation();
+  });
+
   const submitButton = document.createElement('button');
   submitButton.textContent = 'Execute';
   submitButton.id = param + 'exe';
@@ -832,31 +841,32 @@ function createDropdown(param, db) {
 }
 
 function createButton(func, param, db) {
-  const button = document.createElement('button');
+  const wrapper = document.createElement('div');
+  wrapper.style.position = 'relative';
 
+
+  const button = document.createElement('button');
 
   const icon = document.createElement('i');
   icon.className = 'fa-solid fa-caret-down';
   button.appendChild(icon);
   button.className = 'dynamicButton';
 
-  let dropdown = null;
-  if (param == null) {
-    dropdown = func();
-  }
-  else {
-    dropdown = func(param, db)
-  }
+  let dropdown = param == null ? func() : func(param, db);
 
   dropdown.style.visibility = 'hidden';
   dropdown.style.pointerEvents = 'none';
 
-  button.appendChild(dropdown);
-  dropdown.addEventListener('click', (event) => {
+  wrapper.appendChild(button);
+  wrapper.appendChild(dropdown);
+
+  dropdown.addEventListener('mousedown', function(event) {
     event.stopPropagation();
   });
 
-  button.addEventListener('click', () => {
+  button.addEventListener('click', function(event) {
+    event.stopPropagation();
+
     if (dropdown.style.visibility === 'hidden') {
       dropdown.style.visibility = 'visible';
       dropdown.style.pointerEvents = 'auto';
@@ -868,7 +878,7 @@ function createButton(func, param, db) {
     }
   });
 
-  return button;
+  return wrapper;
 }
 
 function createCondition(id) {
@@ -895,24 +905,6 @@ function createCondition(id) {
 
 modeler.get('eventBus').on('shape.added', (event) => {
   const shape = event.element;
-
-  /*
-  if(shape.businessObject && shape.businessObject.$instanceOf('bpmn:ExclusiveGateway')) {
-
-   
-    let cond = createButton(createCondition)
-    overlays.add(shape.id, 'note', {
-      position: {
-        bottom: 5,
-        right: 67
-      },
-      show: {
-        minZoom: 0.7
-      },
-      html: cond 
-    });
-  }
-  */
 
   // Check if the shape is a BPMN element (excluding labels)
 
