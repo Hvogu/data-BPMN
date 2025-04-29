@@ -1,7 +1,7 @@
 const { getPool, createMDBPool, updateTable,
     deleteFromTable,
     addToTable,
-    fetchTable } = require('./db'); // Import MariaDB connection
+    fetchTable, getPrimaryKey, getForeignKeys } = require('./db'); // Import MariaDB connection
 const express = require('express');
 const getSchema = require('./ERD-diagram/getSchema');
 const generateErd = require('./ERD-diagram/generateErd');
@@ -142,6 +142,35 @@ app.get("/api/fetchTable", async (req, res) => {
         res.status(500).json({ error: "Failed to fetch table data" });
     }
 });
+
+app.get("/api/getPrimaryKey/:tableName", async (req, res) => {
+    const tableName = req.params.tableName;
+    if (!tableName || tableName === "") {
+        return res.status(400).json({ error: "Missing statement" });
+    }
+    try {
+        const primaryKey = await getPrimaryKey(tableName);
+        res.json(primaryKey);
+    } catch (error) {
+        console.error("❌ Error fetching primary key:", error);
+        res.status(500).json({ error: "Failed to fetch primary key" });
+    }
+}
+);
+app.get("/api/getForeignKeys/:tableName", async (req, res) => {
+    const tableName = req.params.tableName;
+    if (!tableName || tableName === "") {
+        return res.status(400).json({ error: "Missing statement" });
+    }
+    try {
+        const foreignKey = await getForeignKeys(tableName);
+        res.json(foreignKey);
+    } catch (error) {
+        console.error("❌ Error fetching foreign key:", error);
+        res.status(500).json({ error: "Failed to fetch foreign key" });
+    }
+}
+);
 
 app.post("/api/addToTable", async (req, res) => {
     const { tableName, data } = req.body;

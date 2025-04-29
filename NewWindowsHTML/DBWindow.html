@@ -69,6 +69,23 @@
         const tableContent = document.getElementById("table-content");
         const backButton = document.getElementById("back-button");
 
+        function checkIfPrimaryAndForeignKey(header, primaryKeys, foreignKeys) {
+            var headerReturned = header;
+            for (const pk of primaryKeys) {
+                if (header === pk.primaryKey) {
+                    headerReturned += `(PK)`;
+                }
+            }
+            for (const fk of foreignKeys) {
+                if (header === fk.foreignKey) {
+                    headerReturned += `(FK -> ${fk.tableName})`;
+                }
+            }
+
+            return headerReturned;
+        }
+
+
         async function loadTables() {
             const res = await fetch('http://localhost:3000/api/allTables');
             const tables = await res.json();
@@ -87,6 +104,14 @@
             const res = await fetch(`http://localhost:3000/api/table/${tableName}`);
             const rows = await res.json();
 
+            const primaryKeyRes = await fetch(`http://localhost:3000/api/getPrimaryKey/${tableName}`);
+            const primaryKeys = await primaryKeyRes.json();
+            console.log(primaryKeys);
+
+            const foreignKeyRes = await fetch(`http://localhost:3000/api/getForeignKeys/${tableName}`);
+            const foreignKeys = await foreignKeyRes.json();
+            console.log(foreignKeys);
+
             tableListEl.style.display = "none";
             tableDataEl.style.display = "block";
             backButton.style.display = "inline-block";
@@ -100,17 +125,23 @@
             }
 
             const headers = Object.keys(rows[0]);
+
             const headerRow = document.createElement('tr');
+            console.log(headers);
             headers.forEach(h => {
                 const th = document.createElement('th');
-                th.textContent = h;
+
+
+                th.textContent = checkIfPrimaryAndForeignKey(h, primaryKeys, foreignKeys);
                 headerRow.appendChild(th);
             });
             tableContent.appendChild(headerRow);
 
             rows.forEach(row => {
+
                 const tr = document.createElement('tr');
                 headers.forEach(h => {
+
                     const td = document.createElement('td');
                     td.textContent = row[h];
                     tr.appendChild(td);
