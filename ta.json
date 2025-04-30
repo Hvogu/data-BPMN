@@ -13,12 +13,7 @@
       ],
       "properties":[
         {
-          "name": "pre",
-          "isAttr": true,
-          "type": "String"
-        },
-        {
-          "name": "eff",
+          "name": "text",
           "isAttr": true,
           "type": "String"
         }

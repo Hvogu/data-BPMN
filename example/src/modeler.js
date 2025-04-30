@@ -165,16 +165,37 @@ const modeler = new BpmnModeler({
 
 
 
-function openDiagram(diagram) {
+async function openDiagram(diagram) {
+  try {
+    // Import the XML
+    const { warnings } = await modeler.importXML(diagram);
+    console.log('Import warnings:', warnings);
 
+    // Access the element registry
+    const elementRegistry = modeler.get('elementRegistry');
 
-  return modeler.importXML(diagram)
-    .then(() => {
+    // Iterate over all elements in the diagram
+    elementRegistry.forEach((element) => {
+      // Check if the element is of a specific type (e.g., 'bpmn:Task')
+      if (element.type === 'ta:dataTask') {
+        console.log('Parsing element:', element);
 
+        // Custom parsing logic for the element
+        const businessObject = element.businessObject;
+        console.log('Business object:', businessObject);
+        // Example: Add a custom property or parse an existing one
+        // if (businessObject.customProperty) {
+        //   console.log('Custom property found:', businessObject.customProperty);
+        // } else {
+        //   businessObject.customProperty = 'ParsedValue';
+        // }
+      }
+    });
 
-
-    })
-
+    console.log('Diagram loaded and elements parsed.');
+  } catch (err) {
+    console.error('Error loading diagram:', err.message, err.warnings);
+  }
 }
 
 
@@ -198,7 +219,7 @@ document.body.addEventListener('dragover', fileDrop('Open BPMN diagram', openFil
 
 const moddle = modeler.get('moddle'), modeling = modeler.get('modeling');
 
-function updateQueryFieldById(elementId, text1, text2) {
+async function updateQueryFieldById(elementId, text1, text2) {
   // Get the BPMN model element by its ID using the element registry
   const element = modeler.get('elementRegistry').get(elementId);
 
@@ -218,18 +239,13 @@ function updateQueryFieldById(elementId, text1, text2) {
       extensionElements.get('values').push(analysisDetails);
     }
 
-
-
-
-
     modeling.updateProperties(element, {
       extensionElements,
-      pre: text1,
-      eff: text2
+      text: text1
     });
 
     // Ensure that the changes are reflected in the XML
-    const bpmnXML = modeler.saveXML({ format: true });
+    const bpmnXML = await modeler.saveXML({ format: true });
     console.log(bpmnXML); // Log XML to check if the values are included
   }
 }
@@ -239,6 +255,7 @@ function getExtensionElement(element, type) {
   if (!element.extensionElements) {
     return;
   }
+  console.log(element.extensionElements.values);
 
   return element.extensionElements.values.filter((extensionElement) => {
     return extensionElement.$instanceOf(type);
@@ -247,26 +264,21 @@ function getExtensionElement(element, type) {
 
 
 // Function to download the BPMN diagram
-function downloadDiagram() {
-
-
-
+async function downloadDiagram() {
   for (var i = 0; i < dataTask_list.length; i++) {
-    let text1 = document.getElementById(dataTask_list[i] + 'sql').value
+    let text1 = document.getElementById(dataTask_list[i]).sqlEditor.value;
 
-    console.log(text1)
+    console.log(text1);
     updateQueryFieldById(dataTask_list[i].slice(0, -4), text1);
-
-
   }
 
-
-  // Save and download the BPMN diagram
-  modeler.saveXML({ format: true }, function (err, xml) {
-    if (!err) {
-      download(xml, 'diagram.bpmn', 'application/xml');
-    }
-  });
+  try {
+    // Use the Promise-based API for saveXML
+    const { xml } = await modeler.saveXML({ format: true });
+    download(xml, 'diagram.bpmn', 'application/xml');
+  } catch (err) {
+    console.error('Error saving XML:', err);
+  }
 }
 
 var downloadButton = document.getElementById('download-button');
