@@ -36,7 +36,7 @@ import fileOpen from 'file-open';
 import download from 'downloadjs';
 import exampleXML from '../resources/example.bpmn';
 import { has } from 'min-dash';
-import { RESET_SIMULATION_EVENT } from '../../lib/util/EventHelper.js';
+import { RESET_SIMULATION_EVENT, TOGGLE_MODE_EVENT } from '../../lib/util/EventHelper.js';
 import { event } from 'min-dom';
 
 const url = new URL(window.location.href);
@@ -806,7 +806,7 @@ function createDropdown(param, db) {
   const dropdown = document.createElement('div');
   dropdown.className = 'dynamicDropdown';
   dropdown.id = param + 'drop';
-  getTextBoxes(dropdown);
+  getTextBoxes(dropdown, modeler.get('eventBus'));
 
   dropdown.addEventListener('mousedown', function(event) {
     event.stopPropagation();
@@ -921,6 +921,14 @@ function createDropdown(param, db) {
       datataskTriggered = false;
       resolve();
     });
+  });
+
+  modeler.get('eventBus').on(TOGGLE_MODE_EVENT, (isToggleMode) => {
+    if (isToggleMode.active) {
+      submitButton.style.display = 'none';
+    } else {
+      submitButton.style.display = 'block';
+    }
   });
 
   dropdown.appendChild(submitButton);
