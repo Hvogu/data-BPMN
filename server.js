@@ -136,7 +136,7 @@ app.get("/api/fetchTable", async (req, res) => {
     }
     try {
         const rows = await fetchTable(tableName);
-        res.json(rows);
+        res.json({ rows: rows, affectedRows: rows.length });
     } catch (error) {
         console.error("❌ Error fetching table:", error);
         res.status(500).json({ error: "Failed to fetch table data" });
@@ -202,14 +202,14 @@ app.post("/api/deleteFromTable", async (req, res) => {
     try {
         result = await deleteFromTable(tableName, data);
         if (result.success) {
-            res.json({ success: true });
+            res.json({ success: true, affectedRows: result.affectedRows });
         } else {
             res.status(400).json({ success: false, error: result.error });
         }
 
     } catch (error) {
         console.error("❌ Error deleting from table:", error);
-        res.status(500).json({ error: "Failed to delete data from table" });
+        res.status(500).json({ error: error });
     }
 }
 );
@@ -223,11 +223,16 @@ app.post("/api/updateTable", async (req, res) => {
         return res.status(400).json({ error: "Missing tableName, conditions, or variableChange" });
     }
     try {
-        await updateTable(tableName, conditions, variableChanges);
-        res.json({ success: true });
+        result = await updateTable(tableName, conditions, variableChanges);
+        if (result.success) {
+            console.log(result.affectedRows);
+            res.json({ success: true, affectedRows: result.affectedRows });
+        } else {
+            res.status(400).json({ success: false, error: result.error });
+        }
     } catch (error) {
         console.error("❌ Error updating table:", error);
-        res.status(500).json({ error: "Failed to update data in table" });
+        res.status(500).json({ error: error });
     }
 }
 );
