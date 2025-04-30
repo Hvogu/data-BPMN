@@ -176,19 +176,12 @@ async function openDiagram(diagram) {
 
     // Iterate over all elements in the diagram
     elementRegistry.forEach((element) => {
-      // Check if the element is of a specific type (e.g., 'bpmn:Task')
-      if (element.type === 'ta:dataTask') {
-        console.log('Parsing element:', element);
-
+      // console.log('Element ID:', element.type);
+      // Check if the element is of a data task
+      if (element.businessObject && element.businessObject.$instanceOf('ta:DataTask')) {
         // Custom parsing logic for the element
-        const businessObject = element.businessObject;
-        console.log('Business object:', businessObject);
-        // Example: Add a custom property or parse an existing one
-        // if (businessObject.customProperty) {
-        //   console.log('Custom property found:', businessObject.customProperty);
-        // } else {
-        //   businessObject.customProperty = 'ParsedValue';
-        // }
+        document.getElementById(element.id + 'drop').sqlEditor.value = element.businessObject.text;
+        document.getElementById(element.id + 'drop').label.textContent = element.businessObject.text;
       }
     });
 
@@ -220,6 +213,7 @@ document.body.addEventListener('dragover', fileDrop('Open BPMN diagram', openFil
 const moddle = modeler.get('moddle'), modeling = modeler.get('modeling');
 
 async function updateQueryFieldById(elementId, text1, text2) {
+  //debugger
   // Get the BPMN model element by its ID using the element registry
   const element = modeler.get('elementRegistry').get(elementId);
 
@@ -257,9 +251,7 @@ function getExtensionElement(element, type) {
   }
   console.log(element.extensionElements.values);
 
-  return element.extensionElements.values.filter((extensionElement) => {
-    return extensionElement.$instanceOf(type);
-  })[0];
+  return element.extensionElements
 }
 
 
@@ -914,17 +906,16 @@ function createCondition(id) {
 
 modeler.get('eventBus').on('shape.added', (event) => {
   const shape = event.element;
+  //debugger
 
   // Check if the shape is a BPMN element (excluding labels)
 
   if (shape.businessObject && shape.businessObject.$instanceOf('ta:DataTask')) {
 
-
     const businessObject = getBusinessObject(shape);
 
     // const extensionElements = businessObject.extensionElements;
     let datatask = getExtensionElement(businessObject, 'ta:DataTask');
-
 
     const extensionElements = businessObject.extensionElements || moddle.create('bpmn:ExtensionElements');
 
@@ -934,7 +925,6 @@ modeler.get('eventBus').on('shape.added', (event) => {
       extensionElements.get('values').push(datatask);
     }
 
-    console.log(datatask)
     const button = createButton(createDropdown, shape.id, db);
 
     document.getElementById('buttonContainer').appendChild(button);
