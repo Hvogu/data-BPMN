@@ -85,19 +85,20 @@
   <div id="textContainer"></div>
   <div class="links bottom-links">
     <button class="link" id="process-button">Process variables</button>
-    <button class="link" id="database-button">Database</button>
+
     <button class="link" id="download-button">Download Diagram</button>
-    <button class="link" id="showcase-database-button">Showcase database</button>
+
     <button class="link" id="mariadb-button">MariaDB</button>
 
-    <div id="table-panel" class="hidden">
+    <div id="table-panel" class="hidden"
+      style="padding: 10px; width: 250px; font-family: sans-serif; background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
       <div id="table-list-view">
-        <div style="display: flex; flex-direction: row; padding: 5px;">
-          <h3>Database Tables</h3>
-          <button style="max-height: 30px; margin-left: 30px;" id="open-tables-page">open in mew window</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <h3 style="margin: 0;">Database Tables</h3>
+          <button style="padding: 4px 8px;" id="open-tables-page">open in new window</button>
         </div>
 
-        <ul id="table-list">
+        <ul id="table-list" style="list-style: none; padding-left: 0; max-height: 200px; ">
           <li>Loading...</li>
         </ul>
       </div>
@@ -106,6 +107,21 @@
         <table id="table-data" style="width: 100%; margin-bottom: 10px;"></table>
         <button id="back-button">← Back to Tables</button>
       </div>
+      <style>
+        .table-button {
+          padding: 6px 12px;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 14px;
+        }
+
+        .table-button:hover {
+          background-color: #0056b3;
+        }
+      </style>
     </div>
 
     <div id="popup" class="popup">
@@ -122,69 +138,7 @@
 
     </div>
 
-    <div id="connection" class=" hidden">
-      <button id="init">Initialize</button>
-      <textarea id="jsonData" rows="10" cols="50">
-        {
-          "users": [
-            {
-              "id": 1,
-              "username": "john_doe",
-              "email": "john@example.com",
-              "age": 30,
-              "isActive": true
-            },
-            {
-              "id": 2,
-              "username": "jane_smith",
-              "email": "jane@example.com",
-              "age": 25,
-              "isActive": false
-            },
-            {
-              "id": 3,
-              "username": "alice_jones",
-              "email": "alice@example.com",
-              "age": 28,
-              "isActive": true
-            }
-          ],
-          "products": [
-            {
-              "id": 1,
-              "product_name": "Sample Product",
-              "price": 49.99,
-              "stock": 100
-            },
-            {
-              "id": 2,
-              "product_name": "Another Product",
-              "price": 29.99,
-              "stock": 50
-            }
-          ],
-          "user_products": [
-            {
-              "user_id": 1,
-              "product_id": 1,
-              "quantity": 2
-            },
-            {
-              "user_id": 2,
-              "product_id": 1,
-              "quantity": 1
-            },
-            {
-              "user_id": 3,
-              "product_id": 2,
-              "quantity": 3
-            }
-          ]
-        }
-        
-      </textarea>
 
-    </div>
 
     <div id="custom-sql-popup"
       style="display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%); background:white; padding:20px; border:2px solid black; z-index:9999;">

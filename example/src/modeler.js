@@ -14,6 +14,13 @@ import { getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
 import messageService from './messageService';
 import { evalPreCondition, executeEffects } from '../../lib/custom/parsers/effExuecute.js'
 
+
+import { PauseIcon, PlayIcon } from '../../lib/icons/index.js';
+import { getLogger } from '../../lib/features/log/logger.js';
+import { getCurrentScope } from '../../lib/features/log/Log.js';
+
+
+
 import getAll from "../../lib/custom/parsers/finalPreEff.js";
 import getTextBoxes from '../../lib/custom/parser2/textBox.js';
 import handleEffect from '../../lib/custom/parser2/effect.js';
@@ -46,104 +53,11 @@ const presentationMode = url.searchParams.has('pm');
 let fileName = 'diagram.bpmn';
 
 
-function extractAttributesAndTables(jsonText) {
-  const result = {
-    attributeNames: [],
-    tables: []
-  };
-
-  try {
-    const jsonData = JSON.parse(jsonText);
-
-    if (typeof jsonData === 'object') {
-      for (const key in jsonData) {
-        if (jsonData.hasOwnProperty(key) && Array.isArray(jsonData[key])) {
-          result.tables.push(key);
-
-          if (jsonData[key].length > 0 && typeof jsonData[key][0] === 'object') {
-            const attributes = Object.keys(jsonData[key][0]);
-            result.attributeNames.push(...attributes);
-          }
-        }
-      }
-    }
-  } catch (error) {
-    console.error('Error parsing JSON:', error.message);
-  }
-
-  return result;
-}
-init.addEventListener('click', () => {
-
-  setDb(JSON.parse(jsonData.value))
-  extractTableAttributes(jsonData.value)
-  console.log(tableData)
-  const res = extractAttributesAndTables(jsonData.value)
-  setCol(res.attributeNames);
-  setTables(res.tables);
-  console.log(db)
-
-  if (!con) {
-
-    const customDate = JSON.parse(jsonData.value)
-    checkDatabaseStatus()
-      .then(databaseStatus => {
-        if (databaseStatus === 'no') {
-          // Database is not initialized, proceed with saving custom data
-          return saveDataToServer(customDate);
-        } else {
-          // Database is initialized, log a message or perform other actions
-          console.log('Database is already initialized.');
-          con = true
-        }
-      })
-      .catch(error => {
-        // Handle errors from checkDatabaseStatus or saveDataToServer
-        console.error('Error:', error);
-      });
-  }
-  else {
-    console.log('Database is already initialized.');
-  }
 
 
-})
 
-// Function to check if the database is initialized
-async function checkDatabaseStatus() {
-  try {
-    const response = await fetch('http://localhost:3000/check_database');
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-    return await response.text();
-  } catch (error) {
-    console.error('Error checking database status:', error);
-    throw error; // Propagate the error to the next catch block if needed
-  }
-}
 
-// Function to save data to the server
-async function saveDataToServer(data) {
-  try {
-    const response = await fetch('http://localhost:3000/populate_database', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ customData: data }),
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-    const data_1 = await response.json();
-    console.log('Data saved successfully:', data_1);
-    con = true;
-  } catch (error) {
-    console.error('Error saving data:', error);
-    throw error; // Propagate the error to the next catch block if needed
-  }
-}
+
 
 document.addEventListener("DOMContentLoaded", function () {
   const variableInput = document.getElementById("variableInput");
@@ -442,25 +356,8 @@ if (remoteDiagram) {
 toggleProperties(url.searchParams.has('pp'));
 
 
-const databaseButton = document.getElementById('database-button')
-const showcaseDatabase = document.getElementById('showcase-database-button')
 
-showcaseDatabase.addEventListener('click', async () => {
-  console.log('Showcase database button clicked!');
-  try {
-    // Trigger backend to generate schema.json + erd-diagram.svg
-    const res = await fetch('http://localhost:3000/api/generate-erd');
 
-    if (res.ok) {
-      // Open the newly generated SVG in a new tab
-      window.open("http://localhost:3000/erd", "_blank");
-    } else {
-      console.error("Server returned an error:", await res.json());
-    }
-  } catch (err) {
-    console.error("❌ Failed to generate ERD:", err);
-  }
-});
 
 const mariadbButton = document.getElementById('mariadb-button')
 const tablePanel = document.getElementById('table-panel');
@@ -568,25 +465,11 @@ async function fetchAndDisplayTableData(tableName) {
 
 const connection = document.getElementById('connection')
 
-databaseButton.addEventListener('click', function () {
 
-
-  if (connection.classList.contains('hidden')) {
-    connection.classList.remove('hidden');
-  }
-  else if (!false) {
-    connection.classList.add('hidden');
-  }
-
-
-});
 window.addEventListener('click', (event) => {
   const { target } = event;
 
-  if (!connection.contains(target) && target !== databaseButton) {
-    connection.classList.add('hidden');
 
-  }
   if (!varpanel.contains(target) && target !== process) {
     varpanel.classList.add('hidden');
   }
@@ -659,32 +542,28 @@ async function simulateProcess() {
 
 
 
-      if (!textarea.value) {
-        alert('non empty SQL statement required');
-        document.querySelector('.bts-toggle-mode').dispatchEvent(new Event('click'));
-        modeler.get('eventBus').fire(RESET_SIMULATION_EVENT);
-      } else {
-        const execute = document.getElementById(`${result.element.id}exe`);
-        await simulateExecution(result.element.id);
 
-        // ✅ NEW: Pause if needed
-        while (isPaused) {
-          console.log('Simulation paused...waiting for fix.');
-          await new Promise(resolve => setTimeout(resolve, 100));
-        }
-        console.log('Simulation step complete:', result.element.id);
+      const execute = document.getElementById(`${result.element.id}exe`);
+      await simulateExecution(result.element.id);
 
-        simCall = false;
-        console.log('Simulation completed successfully!');
-
-        modeler.get('eventBus').fire('tokenSimulation.simulator.trace', {
-          element: result.element,
-          scope: result.scope
-        });
-        console.log('Element exited successfully!');
-
-        // Additional actions to be performed after the button click event
+      // ✅ NEW: Pause if needed
+      while (isPaused) {
+        console.log('Simulation paused...waiting for fix.');
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
+      console.log('Simulation step complete:', result.element.id);
+
+      simCall = false;
+      console.log('Simulation completed successfully!');
+
+      modeler.get('eventBus').fire('tokenSimulation.simulator.trace', {
+        element: result.element,
+        scope: result.scope
+      });
+      console.log('Element exited successfully!');
+
+      // Additional actions to be performed after the button click event
+
     } catch (error) {
       // Handle errors here
       console.error('Error:', error);
@@ -728,46 +607,57 @@ async function simulateExecution(elementId) {
   return new Promise(async (resolve) => {
     modeler.get('eventBus').fire('tokenSimulation.pauseSimulation');
 
-
-    const dropdown = document.getElementById(`${elementId}drop`);
-    const textWithUserInput = await inputVarParser(dropdown.sqlEditor.value);
-    const sql = extractPreAndEffect(textWithUserInput);
-
-
-
-    if (sql.pre != undefined) {
-      sql.pre = processVarParser(sql.pre);
-      let preCon = await handlePreCon(sql.pre);
-
-      if (preCon.isTrue) {
-        sql.effect = await chooseSelRes(sql.effect, preCon.result);
+    try {
+      const dropdown = document.getElementById(`${elementId}drop`);
+      const textWithUserInput = await inputVarParser(dropdown.sqlEditor.value);
+      const sql = extractPreAndEffect(textWithUserInput);
 
 
-        try {
+
+      if (sql.pre != undefined) {
+        sql.pre = processVarParser(sql.pre);
+        let preCon = await handlePreCon(sql.pre);
+
+        if (preCon.isTrue) {
+          sql.effect = await chooseSelRes(sql.effect, preCon.result);
+
+
+
           await handleEffect(sql.effect);
           modeler.get('eventBus').fire('tokenSimulation.playSimulation');
           resolve(); // Move only if successful
-        } catch (error) {
-          console.error('Effect failed, waiting for user fix.');
-          // WAIT for user to confirm new query
-          waitForUserCorrection(elementId, resolve);
+
         }
-      }
-    } else {
-      try {
+      } else {
+
         await handleEffect(sql.effect);
         modeler.get('eventBus').fire('tokenSimulation.playSimulation');
         resolve(); // Success
-      } catch (error) {
-        console.error('Effect failed, waiting for user fix.');
-        // WAIT for user to confirm new query
-        waitForUserCorrection(elementId, resolve);
+
+
       }
+    } catch (error) {
+      console.error('Effect failed, waiting for user fix.');
+      // WAIT for user to confirm new query
+
+      waitForUserCorrection(elementId, resolve);
+
     }
   });
 }
+let hasPaused = true;
 
 function waitForUserCorrection(elementId, resolve) {
+  if (hasPaused) {
+    getLogger().log({
+      text: "Paused until user corrects SQL",
+      icon: PauseIcon(),
+      scope: getCurrentScope()
+    });
+    hasPaused = false;
+  }
+
+
   console.log('Waiting for user to correct SQL...');
   const popup = document.getElementById('custom-sql-popup');
   const textarea = document.getElementById('custom-sql-textarea');
@@ -796,6 +686,17 @@ function waitForUserCorrection(elementId, resolve) {
     }
 
     modeler.get('eventBus').fire('tokenSimulation.playSimulation');
+
+    if (!hasPaused) {
+      getLogger().log({
+        text: "Resuming simulation!",
+        icon: PlayIcon(),
+        scope: getCurrentScope()
+      });
+      hasPaused = true; // Reset the flag for the next pause
+
+    }
+
     resolve(); // <-- Important: Only resolve AFTER correction
   }
 }

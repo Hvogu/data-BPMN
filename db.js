@@ -49,9 +49,10 @@ async function fetchTable(tableName) {
         const rows = await conn.query("SELECT * FROM " + tableName); // Query database
         console.log("" + tableName + ":", rows); // Display the result
 
-        return rows; // Return the data
+        return { success: true, rows: rows, affectedRows: rows.affectedRows }; // Return the data
     } catch (err) {
         console.error("Database query error:", err);
+        return { success: false, error: err.message };
     } finally {
         if (conn) conn.release(); // Release the connection
     }
@@ -101,7 +102,7 @@ async function deleteFromTable(tableName, data) {
         const result = await conn.query(query); // Execute the query
 
         console.log(` Deleted ${result.affectedRows} rows from ${tableName}`);
-        return { success: true, rowsDeleted: result.affectedRows };
+        return { success: true, affectedRows: result.affectedRows };
     } catch (err) {
         console.error(` Error deleting from ${tableName}:`, err);
         return { success: false, error: err.message };
@@ -321,11 +322,14 @@ async function updateTable(tableName, conditions, variableChanges) {
         const proc = await createProc(tableName, primaryKey, conditions, variableChanges);
         console.log(proc);
         conn = await pool.getConnection(); // Get a connection
-        await conn.query(proc); // Execute the query
+        const result = await conn.query(proc); // Execute the query
         console.log("Procedure created and table updated successfully.");
+        console.log(result.affectedRows);
+        return { success: true, affectedRows: result.affectedRows };
 
     } catch (error) {
         console.error(` Error creating procedure for ${tableName}:`, error);
+        return { success: false, error: error.message };
     } finally {
         if (conn) conn.release(); // Release the connection
     }
