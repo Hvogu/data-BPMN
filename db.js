@@ -132,6 +132,33 @@ async function getTableColumns(tableName) {
         if (conn) conn.release(); // Release the connection
     }
 }
+async function getForeignKeys(tableName) {
+    const connection = await pool.getConnection();
+
+    try {
+        const dbNameResult = await connection.query('SELECT DATABASE() AS db');
+        const dbName = dbNameResult[0].db;
+
+        const results = await connection.query(
+            `SELECT 
+           COLUMN_NAME AS foreignKey,
+           REFERENCED_TABLE_NAME AS tableName
+         FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+         WHERE 
+           TABLE_SCHEMA = ? AND 
+           TABLE_NAME = ? AND 
+           REFERENCED_TABLE_NAME IS NOT NULL`,
+            [dbName, tableName]
+        );
+
+        return results;
+    } catch (error) {
+        console.error('❌ Error fetching foreign keys:', error);
+        return [];
+    } finally {
+        connection.release();
+    }
+}
 
 async function getPrimaryKey(tableName) {
     try {
@@ -320,5 +347,7 @@ module.exports = {
     updateTable,
     deleteFromTable,
     addToTable,
-    fetchTable
+    fetchTable,
+    getPrimaryKey,
+    getForeignKeys
 }

@@ -637,25 +637,26 @@ window.onload = function () {
   document.body.appendChild(myDiv)
 };
 
+
+
 // You might want to put the simulation process in a function or event handler
 async function simulateProcess() {
-  console.log('Bobr Kurwa');
+
+
+
+
 
   while (isRunning) {
     try {
       simCall = true;
       const result = await simulationSupport.elementEnter('ta:DataTask');
       console.log('Simulation result:', result);
-      if (!isRunning) {
-        console.log('Operation cancelled');
-        break; // Exit the loop if isRunning is false
-      }
+
 
       const datatask = document.getElementById(`${result.element.id}drop`);
-      console.log("datatask:", datatask);
+
       const textarea = document.getElementById(`${datatask.id}sql`);
-      console.log("textarea:", textarea);
-      console.log("textarea.value:", textarea.value);
+
 
 
       if (!textarea.value) {
@@ -664,12 +665,18 @@ async function simulateProcess() {
         modeler.get('eventBus').fire(RESET_SIMULATION_EVENT);
       } else {
         const execute = document.getElementById(`${result.element.id}exe`);
-        await execute.click();
-        console.log('Button click event fully processed');
-        console.log(result.element.id)
+        await simulateExecution(result.element.id);
+
+        // ✅ NEW: Pause if needed
+        while (isPaused) {
+          console.log('Simulation paused...waiting for fix.');
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        console.log('Simulation step complete:', result.element.id);
 
         simCall = false;
         console.log('Simulation completed successfully!');
+
         modeler.get('eventBus').fire('tokenSimulation.simulator.trace', {
           element: result.element,
           scope: result.scope
@@ -699,6 +706,9 @@ var datataskTriggered = false
 
 var dataTask_list = [];
 
+let lastFailedDataTaskId = null;
+let isPaused = false;
+
 function extractPreAndEffect(input) {
   const pattern = /^\s*when\s+(.*?)\s+then\s+(.*)$/i;
   const match = input.match(pattern);
@@ -712,6 +722,84 @@ function extractPreAndEffect(input) {
     return { pre: undefined, effect: input.trim() };
   }
 }
+
+async function simulateExecution(elementId) {
+
+  return new Promise(async (resolve) => {
+    modeler.get('eventBus').fire('tokenSimulation.pauseSimulation');
+
+
+    const dropdown = document.getElementById(`${elementId}drop`);
+    const textWithUserInput = await inputVarParser(dropdown.sqlEditor.value);
+    const sql = extractPreAndEffect(textWithUserInput);
+
+
+
+    if (sql.pre != undefined) {
+      sql.pre = processVarParser(sql.pre);
+      let preCon = await handlePreCon(sql.pre);
+
+      if (preCon.isTrue) {
+        sql.effect = await chooseSelRes(sql.effect, preCon.result);
+
+
+        try {
+          await handleEffect(sql.effect);
+          modeler.get('eventBus').fire('tokenSimulation.playSimulation');
+          resolve(); // Move only if successful
+        } catch (error) {
+          console.error('Effect failed, waiting for user fix.');
+          // WAIT for user to confirm new query
+          waitForUserCorrection(elementId, resolve);
+        }
+      }
+    } else {
+      try {
+        await handleEffect(sql.effect);
+        modeler.get('eventBus').fire('tokenSimulation.playSimulation');
+        resolve(); // Success
+      } catch (error) {
+        console.error('Effect failed, waiting for user fix.');
+        // WAIT for user to confirm new query
+        waitForUserCorrection(elementId, resolve);
+      }
+    }
+  });
+}
+
+function waitForUserCorrection(elementId, resolve) {
+  console.log('Waiting for user to correct SQL...');
+  const popup = document.getElementById('custom-sql-popup');
+  const textarea = document.getElementById('custom-sql-textarea');
+  const confirmButton = document.getElementById('custom-sql-confirm');
+  const dropdown = document.getElementById(`${elementId}drop`);
+  const sqlEditor = dropdown?.querySelector('textarea');
+  textarea.value = sqlEditor.value; // Clear previous value
+  popup.style.display = 'block';
+  confirmButton.disabled = false;
+
+  confirmButton.onclick = async function () {
+    confirmButton.disabled = true;
+    popup.style.display = 'none';
+
+    const newQuery = textarea.value;
+
+    if (sqlEditor) {
+      sqlEditor.value = newQuery;
+    }
+
+    try {
+      // Re-attempt the execution after user correction
+      await simulateExecution(elementId);
+    } catch (e) {
+      console.error('Still error after correction:', e);
+    }
+
+    modeler.get('eventBus').fire('tokenSimulation.playSimulation');
+    resolve(); // <-- Important: Only resolve AFTER correction
+  }
+}
+
 
 
 function createDropdown(param, db) {
@@ -734,7 +822,7 @@ function createDropdown(param, db) {
   dataTask_list.push(param + 'drop');
   console.log(submitButton.id);
 
-  submitButton.addEventListener('click', async function() {
+  submitButton.addEventListener('click', async function () {
     return new Promise(async (resolve) => {
 
       while (datataskTriggered) {
@@ -766,13 +854,13 @@ function createDropdown(param, db) {
         console.log(sql.pre);
         let preCon = await handlePreCon(sql.pre);
         console.log(preCon);
-        try {console.log(preCon.isTrue);} catch (err) {console.error(err);}
+        try { console.log(preCon.isTrue); } catch (err) { console.error(err); }
         console.log(preCon.result);
         if (preCon.isTrue) {
           try {
             console.log(typeof sql.effect)
             sql.effect = await chooseSelRes(sql.effect, preCon.result);
-            console.log(sql.effect)
+
             handleEffect(sql.effect);
 
           } catch (err) {
@@ -1017,3 +1105,4 @@ modeler.get('eventBus').on('element.added', (event) => {
     });
   }
 });
+
