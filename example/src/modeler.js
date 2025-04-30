@@ -2,22 +2,35 @@ import TokenSimulationModule from '../..';
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 import AddExporter from '@bpmn-io/add-exporter';
 
+//anton og jesper imports 
 
 /* My Imports */
 import SimulationSupportModule from '../../lib/simulation-support';
+
 import customModule from '../../lib/custom';
 import taPackage from '../../ta.json';
 import data_store from '../../resources/data-store.js';
 import { getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
 import messageService from './messageService';
-import { evalPreCondition,executeEffects} from '../../lib/custom/parsers/effExuecute.js'
+import { evalPreCondition, executeEffects } from '../../lib/custom/parsers/effExuecute.js'
+
+
+import { PauseIcon, PlayIcon } from '../../lib/icons/index.js';
+import { getLogger } from '../../lib/features/log/logger.js';
+import { getCurrentScope } from '../../lib/features/log/Log.js';
+
+
 
 import getAll from "../../lib/custom/parsers/finalPreEff.js";
+import getTextBoxes from '../../lib/custom/parser2/textBox.js';
+import handleEffect from '../../lib/custom/parser2/effect.js';
+import handlePreCon from '../../lib/custom/parser2/preCon.js';
+import { processVarParser, inputVarParser, chooseSelRes } from '../../lib/custom/parser2/varriableChanger.js';
 
-import { processVar,setPro } from '../../lib/custom/parsers/processVar.js';
-import { db,setCol,setDb, setTables,col,tables, tableData ,extractTableAttributes} from '../../lib/custom/parsers/db.js';
+import { processVar, setPro } from '../../lib/custom/parsers/processVar.js';
+import { db, setCol, setDb, setTables, col, tables, tableData, extractTableAttributes } from '../../lib/custom/parsers/db.js';
 
-import parseExpression  from '../../lib/custom/parsers/parser.js'
+import parseExpression from '../../lib/custom/parsers/parser.js'
 const toggle = document.getElementById('bts-toggle-mode')
 const containerE2 = document.getElementById('textContainer')
 const init = document.getElementById('init')
@@ -30,6 +43,8 @@ import fileOpen from 'file-open';
 import download from 'downloadjs';
 import exampleXML from '../resources/example.bpmn';
 import { has } from 'min-dash';
+import { RESET_SIMULATION_EVENT, TOGGLE_MODE_EVENT } from '../../lib/util/EventHelper.js';
+import { event } from 'min-dom';
 
 const url = new URL(window.location.href);
 const persistent = url.searchParams.has('p');
@@ -38,110 +53,17 @@ const presentationMode = url.searchParams.has('pm');
 let fileName = 'diagram.bpmn';
 
 
-function extractAttributesAndTables(jsonText) {
-  const result = {
-      attributeNames: [],
-      tables: []
-  };
 
-  try {
-      const jsonData = JSON.parse(jsonText);
 
-      if (typeof jsonData === 'object') {
-          for (const key in jsonData) {
-              if (jsonData.hasOwnProperty(key) && Array.isArray(jsonData[key])) {
-                  result.tables.push(key);
 
-                  if (jsonData[key].length > 0 && typeof jsonData[key][0] === 'object') {
-                      const attributes = Object.keys(jsonData[key][0]);
-                      result.attributeNames.push(...attributes);
-                  }
-              }
-          }
-      }
-  } catch (error) {
-      console.error('Error parsing JSON:', error.message);
-  }
 
-  return result;
-}
-init.addEventListener('click',()=>{
 
-   setDb(JSON.parse(jsonData.value))
-   extractTableAttributes(jsonData.value)
-   console.log(tableData)
-   const res = extractAttributesAndTables(jsonData.value)
-   setCol(res.attributeNames);
-   setTables(res.tables);
-   console.log(db)
-   
-  if (!con){
-  
-  const customDate = JSON.parse(jsonData.value)
-  checkDatabaseStatus()
-    .then(databaseStatus => {
-        if (databaseStatus === 'no') {
-            // Database is not initialized, proceed with saving custom data
-            return saveDataToServer(customDate);
-        } else {
-            // Database is initialized, log a message or perform other actions
-            console.log('Database is already initialized.');
-            con = true
-        }
-    })
-    .catch(error => {
-        // Handle errors from checkDatabaseStatus or saveDataToServer
-        console.error('Error:', error);
-    });
-  }
-  else{
-    console.log('Database is already initialized.');
-  }
-  
-  
-})
 
-// Function to check if the database is initialized
-async function checkDatabaseStatus() {
-  try {
-    const response = await fetch('http://localhost:3000/check_database');
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-    return await response.text();
-  } catch (error) {
-    console.error('Error checking database status:', error);
-    throw error; // Propagate the error to the next catch block if needed
-  }
-}
-
-// Function to save data to the server
-async function saveDataToServer(data) {
-  try {
-    const response = await fetch('http://localhost:3000/populate_database', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ customData: data }),
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-    const data_1 = await response.json();
-    console.log('Data saved successfully:', data_1);
-    con = true;
-  } catch (error) {
-    console.error('Error saving data:', error);
-    throw error; // Propagate the error to the next catch block if needed
-  }
-}
-
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   const variableInput = document.getElementById("variableInput");
   const processButton = document.getElementById("processButton");
 
-  processButton.addEventListener("click", function() {
+  processButton.addEventListener("click", function () {
     const inputText = variableInput.value;
     const variables = inputText.split(";").map(variable => variable.trim());
     const tupleList = [];
@@ -149,6 +71,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     for (const variable of variables) {
       const match = variable.match(/#(\w+):\s*(string|number|\w+)/);
+      console.log(match)
       if (match) {
         const name = "#" + match[1];
         let value;
@@ -175,13 +98,13 @@ document.addEventListener("DOMContentLoaded", function() {
       variableInput.style.borderWidth = "";
     }
     console.log(processVar);
-   });
+  });
 });
 
-document.getElementById('process-button').addEventListener("click", function(){
+document.getElementById('process-button').addEventListener("click", function () {
 
-  
-  if (varpanel.classList.contains('hidden')){
+
+  if (varpanel.classList.contains('hidden')) {
     varpanel.classList.remove('hidden');
   }
   else {
@@ -225,7 +148,7 @@ const modeler = new BpmnModeler({
     SimulationSupportModule,
     customModule,
     {
-      preserveElementColors: [ 'value', {} ]
+      preserveElementColors: ['value', {}]
     }
   ],
   propertiesPanel: {
@@ -234,8 +157,8 @@ const modeler = new BpmnModeler({
   keyboard: {
     bindTo: document
   },
-  moddleExtensions:{
-    ta:taPackage
+  moddleExtensions: {
+    ta: taPackage
   }
 
 });
@@ -247,11 +170,11 @@ function openDiagram(diagram) {
 
   return modeler.importXML(diagram)
     .then(() => {
-      
-     
-    
+
+
+
     })
-    
+
 }
 
 
@@ -264,7 +187,7 @@ function openFile(files) {
     return;
   }
 
- 
+
 
   fileName = files[0].name;
 
@@ -287,23 +210,23 @@ function updateQueryFieldById(elementId, text1, text2) {
     // Retrieve or create the ExtensionElements element
     const extensionElements = businessObject.extensionElements || moddle.create('bpmn:ExtensionElements');
 
-let analysisDetails = getExtensionElement(businessObject, 'ta:DataTask');
+    let analysisDetails = getExtensionElement(businessObject, 'ta:DataTask');
 
-if (!analysisDetails) {
-  analysisDetails = moddle.create('ta:DataTask');
+    if (!analysisDetails) {
+      analysisDetails = moddle.create('ta:DataTask');
 
-  extensionElements.get('values').push(analysisDetails);
-}
-
-
+      extensionElements.get('values').push(analysisDetails);
+    }
 
 
 
-modeling.updateProperties(element, {
-  extensionElements,
-  pre: text1,
-  eff: text2
-});
+
+
+    modeling.updateProperties(element, {
+      extensionElements,
+      pre: text1,
+      eff: text2
+    });
 
     // Ensure that the changes are reflected in the XML
     const bpmnXML = modeler.saveXML({ format: true });
@@ -328,18 +251,18 @@ function downloadDiagram() {
 
 
 
-  for (var i = 0;i < dataTask_list.length;i++) {
-    let text1 = document.getElementById(dataTask_list[i]+'pre').value
-    let text2 = document.getElementById(dataTask_list[i]+'eff').value
+  for (var i = 0; i < dataTask_list.length; i++) {
+    let text1 = document.getElementById(dataTask_list[i] + 'sql').value
+
     console.log(text1)
-    updateQueryFieldById(dataTask_list[i].slice(0,-4), text1,text2);
+    updateQueryFieldById(dataTask_list[i].slice(0, -4), text1);
 
 
   }
 
 
   // Save and download the BPMN diagram
-  modeler.saveXML({ format: true }, function(err, xml) {
+  modeler.saveXML({ format: true }, function (err, xml) {
     if (!err) {
       download(xml, 'diagram.bpmn', 'application/xml');
     }
@@ -349,9 +272,9 @@ function downloadDiagram() {
 var downloadButton = document.getElementById('download-button');
 
 // Add a click event listener to the button
-downloadButton.addEventListener('click', function() {
+downloadButton.addEventListener('click', function () {
 
- 
+
   downloadDiagram();
 });
 
@@ -376,11 +299,11 @@ function toggleProperties(open) {
   propertiesPanel.classList.toggle('open', open);
 }
 
-propertiesPanelResizer.addEventListener('click', function(event) {
+propertiesPanelResizer.addEventListener('click', function (event) {
   toggleProperties(!propertiesPanel.classList.contains('open'));
 });
 
-propertiesPanelResizer.addEventListener('dragstart', function(event) {
+propertiesPanelResizer.addEventListener('dragstart', function (event) {
   const img = new Image();
   img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
   event.dataTransfer.setDragImage(img, 1, 1);
@@ -389,7 +312,7 @@ propertiesPanelResizer.addEventListener('dragstart', function(event) {
   startWidth = propertiesPanel.getBoundingClientRect().width;
 });
 
-propertiesPanelResizer.addEventListener('drag', function(event) {
+propertiesPanelResizer.addEventListener('drag', function (event) {
 
   if (!event.screenX) {
     return;
@@ -433,33 +356,128 @@ if (remoteDiagram) {
 toggleProperties(url.searchParams.has('pp'));
 
 
-const databaseButton = document.getElementById('database-button')
+
+
+
+const mariadbButton = document.getElementById('mariadb-button')
+const tablePanel = document.getElementById('table-panel');
+const tableList = document.getElementById('table-list');
+const dbwindowbtn = document.getElementById('open-tables-page').addEventListener('click', () => {
+  window.open("http://localhost:3000/DBWindow.html", "_blank");
+
+
+});
+document.getElementById('back-button').addEventListener('click', () => {
+  document.getElementById('table-data-view').style.display = 'none';
+  document.getElementById('table-list-view').style.display = 'block';
+  document.getElementById('table-panel').classList.remove('expanded');
+});
+
+mariadbButton.addEventListener('click', async () => {
+
+  console.log('MariaDB button clicked!');
+
+
+  // Toggle popup
+  if (tablePanel.classList.contains('hidden')) {
+    tablePanel.classList.remove('hidden');
+  } else {
+    tablePanel.classList.add('hidden');
+    return;
+  }
+  tableList.innerHTML = '<li>Loading...</li>';
+
+  try {
+    const res = await fetch('http://localhost:3000/api/allTables');
+    const tables = await res.json();
+    if (!Array.isArray(tables) || tables.length === 0) {
+      tableList.innerHTML = '<li>No tables found</li>';
+      return;
+    }
+
+    tableList.innerHTML = '';
+    tables.forEach(table => {
+      const li = document.createElement('li');
+      li.innerHTML = `<a href="#" data-table="${table}">${table}</a>`;
+      li.querySelector('a').addEventListener('click', async (e) => {
+        e.preventDefault();
+        const tableName = e.target.dataset.table;
+        await fetchAndDisplayTableData(tableName);
+        document.getElementById('table-panel').classList.add('expanded');
+      });
+      tableList.appendChild(li);
+    });
+    console.log('Tables fetched successfully:', tables);
+
+  } catch (err) {
+    console.error('Failed to fetch tables:', err);
+    tableList.innerHTML = '<li>Error loading tables</li>';
+  }
+
+});
+
+async function fetchAndDisplayTableData(tableName) {
+  try {
+    const res = await fetch(`http://localhost:3000/api/table/${tableName}`);
+    const rows = await res.json();
+
+    // Update title
+    document.getElementById('table-title').innerText = `Rows in "${tableName}"`;
+
+    const table = document.getElementById('table-data');
+    table.innerHTML = '';
+
+    if (rows.length === 0) {
+      table.innerHTML = '<tr><td colspan="100%">No data</td></tr>';
+    } else {
+      // Headers
+      const headers = Object.keys(rows[0]);
+      const thead = document.createElement('tr');
+      headers.forEach(h => {
+        const th = document.createElement('th');
+        th.textContent = h;
+        thead.appendChild(th);
+      });
+      table.appendChild(thead);
+
+      // Data rows
+      rows.forEach(row => {
+        const tr = document.createElement('tr');
+        headers.forEach(h => {
+          const td = document.createElement('td');
+          td.textContent = row[h];
+          tr.appendChild(td);
+        });
+        table.appendChild(tr);
+      });
+    }
+
+    // Toggle views
+    document.getElementById('table-list-view').style.display = 'none';
+    document.getElementById('table-data-view').style.display = 'block';
+
+  } catch (err) {
+    console.error("Error fetching table data:", err);
+  }
+}
+
+
 
 const connection = document.getElementById('connection')
 
-databaseButton.addEventListener('click', function () {
-   
 
-    if (connection.classList.contains('hidden')){
-      connection.classList.remove('hidden');
-    }
-    else if (!false){
-      connection.classList.add('hidden');
-    }
-    
-  
-});
 window.addEventListener('click', (event) => {
   const { target } = event;
 
-  if (!connection.contains(target) && target !== databaseButton ) {
-    connection.classList.add('hidden');
-    
-  }
+
   if (!varpanel.contains(target) && target !== process) {
     varpanel.classList.add('hidden');
   }
- 
+
+  if (!tablePanel.contains(target) && target !== mariadbButton) {
+    tablePanel.classList.add('hidden');
+  }
+
 });
 
 // Get the SimulationSupport service from the modeler
@@ -469,67 +487,83 @@ const simulationSupport = modeler.get('simulationSupport');
 simulationSupport.toggleSimulation(true);
 let isRunning = true;
 let simCall = false
-window.onload = function(){
+window.onload = function () {
 
   const div = document.querySelector(".bts-toggle-mode");
-const myDiv = document.createElement('div');myDiv.id='bobr'
-myDiv.style.width = '200px';
-myDiv.style.height = '50px';
-myDiv.style.padding = div.style.padding;
-myDiv.style.position = 'absolute';
-myDiv.style.top = '20px';
-myDiv.style.left = '20px';
+  const myDiv = document.createElement('div'); myDiv.id = 'bobr'
+  myDiv.style.width = '200px';
+  myDiv.style.height = '50px';
+  myDiv.style.padding = div.style.padding;
+  myDiv.style.position = 'absolute';
+  myDiv.style.top = '20px';
+  myDiv.style.left = '20px';
 
 
-myDiv.addEventListener('click',function(){
-    
-   if(isRunning){
-    isRunning=false
-   }
-   else{
-    myDiv.style.pointerEvents='none'
-    isRunning=true
+  myDiv.addEventListener('click', function () {
 
-    if(!simCall)
-      simulateProcess()
-   }
+    if (isRunning) {
+      isRunning = false
+    }
+    else {
+      myDiv.style.pointerEvents = 'none'
+      isRunning = true
+
+      if (!simCall)
+        simulateProcess()
+    }
 
     console.log(isRunning)
-    
-  div.click()
-  
-});
-document.body.appendChild(myDiv)
+
+    div.click()
+
+  });
+  document.body.appendChild(myDiv)
 };
+
+
 
 // You might want to put the simulation process in a function or event handler
 async function simulateProcess() {
-  console.log('Bobr Kurwa');
+
+
+
+
 
   while (isRunning) {
     try {
-      simCall=true;
+      simCall = true;
       const result = await simulationSupport.elementEnter('ta:DataTask');
+      console.log('Simulation result:', result);
 
-      if (!isRunning) {
-        console.log('Operation cancelled');
-        break; // Exit the loop if isRunning is false
-      }
 
       const datatask = document.getElementById(`${result.element.id}drop`);
-   
 
-      if (!datatask.pre || !datatask.eff || !datatask.pre.isPared || !datatask.eff.isPared) {
-        alert('Preconditions and effects must both be parsed correctly.');
-        document.querySelector('.bts-toggle-mode').dispatchEvent(new Event('click'));
-      } else {
-        const execute = document.getElementById(`${result.element.id}exe`);
-        await execute.click();
-        console.log('Button click event fully processed');
-        console.log(result.element.id)
-        simCall=false;
-        // Additional actions to be performed after the button click event
+      const textarea = document.getElementById(`${datatask.id}sql`);
+
+
+
+
+      const execute = document.getElementById(`${result.element.id}exe`);
+      await simulateExecution(result.element.id);
+
+      // ✅ NEW: Pause if needed
+      while (isPaused) {
+        console.log('Simulation paused...waiting for fix.');
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
+      console.log('Simulation step complete:', result.element.id);
+
+      simCall = false;
+      console.log('Simulation completed successfully!');
+
+      modeler.get('eventBus').fire('tokenSimulation.simulator.trace', {
+        element: result.element,
+        scope: result.scope
+      });
+      console.log('Element exited successfully!');
+
+      // Additional actions to be performed after the button click event
+
     } catch (error) {
       // Handle errors here
       console.error('Error:', error);
@@ -544,189 +578,341 @@ async function simulateProcess() {
 
 
 // Call the simulation function to start the simulation process
- 
+
 const overlays = modeler.get('overlays');
 
 var datataskTriggered = false
 
-var dataTask_list =[];
+var dataTask_list = [];
 
-function createDropdown(param,db) {
+let lastFailedDataTaskId = null;
+let isPaused = false;
+
+function extractPreAndEffect(input) {
+  const pattern = /^\s*when\s+(.*?)\s+then\s+(.*)$/i;
+  const match = input.match(pattern);
+
+  if (match) {
+    const pre = match[1].trim();
+    const effect = match[2].trim();
+    return { pre, effect };
+  } else {
+    // No "when ... then" pattern, treat entire string as the effect
+    return { pre: undefined, effect: input.trim() };
+  }
+}
+
+async function simulateExecution(elementId) {
+
+  return new Promise(async (resolve) => {
+    modeler.get('eventBus').fire('tokenSimulation.pauseSimulation');
+
+    try {
+      const dropdown = document.getElementById(`${elementId}drop`);
+      const textWithUserInput = await inputVarParser(dropdown.sqlEditor.value);
+      const sql = extractPreAndEffect(textWithUserInput);
+
+
+
+      if (sql.pre != undefined) {
+        sql.pre = processVarParser(sql.pre);
+        let preCon = await handlePreCon(sql.pre);
+
+        if (preCon.isTrue) {
+          sql.effect = await chooseSelRes(sql.effect, preCon.result);
+
+
+
+          await handleEffect(sql.effect);
+          modeler.get('eventBus').fire('tokenSimulation.playSimulation');
+          resolve(); // Move only if successful
+
+        }
+      } else {
+
+        await handleEffect(sql.effect);
+        modeler.get('eventBus').fire('tokenSimulation.playSimulation');
+        resolve(); // Success
+
+
+      }
+    } catch (error) {
+      console.error('Effect failed, waiting for user fix.');
+      // WAIT for user to confirm new query
+
+      waitForUserCorrection(elementId, resolve);
+
+    }
+  });
+}
+let hasPaused = true;
+
+function waitForUserCorrection(elementId, resolve) {
+  if (hasPaused) {
+    getLogger().log({
+      text: "Paused until user corrects SQL",
+      icon: PauseIcon(),
+      scope: getCurrentScope()
+    });
+    hasPaused = false;
+  }
+
+
+  console.log('Waiting for user to correct SQL...');
+  const popup = document.getElementById('custom-sql-popup');
+  const textarea = document.getElementById('custom-sql-textarea');
+  const confirmButton = document.getElementById('custom-sql-confirm');
+  const dropdown = document.getElementById(`${elementId}drop`);
+  const sqlEditor = dropdown?.querySelector('textarea');
+  textarea.value = sqlEditor.value; // Clear previous value
+  popup.style.display = 'block';
+  confirmButton.disabled = false;
+
+  confirmButton.onclick = async function () {
+    confirmButton.disabled = true;
+    popup.style.display = 'none';
+
+    const newQuery = textarea.value;
+
+    if (sqlEditor) {
+      sqlEditor.value = newQuery;
+    }
+
+    try {
+      // Re-attempt the execution after user correction
+      await simulateExecution(elementId);
+    } catch (e) {
+      console.error('Still error after correction:', e);
+    }
+
+    modeler.get('eventBus').fire('tokenSimulation.playSimulation');
+
+    if (!hasPaused) {
+      getLogger().log({
+        text: "Resuming simulation!",
+        icon: PlayIcon(),
+        scope: getCurrentScope()
+      });
+      hasPaused = true; // Reset the flag for the next pause
+
+    }
+
+    resolve(); // <-- Important: Only resolve AFTER correction
+  }
+}
+
+
+
+function createDropdown(param, db) {
   const dropdown = document.createElement('div');
   dropdown.className = 'dynamicDropdown';
-  dropdown.id=param+'drop'
-  getAll(dropdown,col,tables,processVar,db)
-  
-  
+  dropdown.id = param + 'drop';
+  getTextBoxes(dropdown, modeler.get('eventBus'));
+
+  dropdown.addEventListener('mousedown', function(event) {
+    event.stopPropagation();
+  });
+
+  dropdown.addEventListener('click', function(event) {
+    event.stopPropagation();
+  });
 
   const submitButton = document.createElement('button');
   submitButton.textContent = 'Execute';
-  submitButton.id = param+'exe';
-  dataTask_list.push(param+'drop')
-  console.log(submitButton.id)
+  submitButton.id = param + 'exe';
+  dataTask_list.push(param + 'drop');
+  console.log(submitButton.id);
 
-  submitButton.addEventListener('click', async function() {
+  submitButton.addEventListener('click', async function () {
     return new Promise(async (resolve) => {
 
       while (datataskTriggered) {
         await new Promise(resolve => setTimeout(resolve, 100)); // Adjust the polling interval as needed
       }
       datataskTriggered = true;
-  
+
       var elements = document.querySelectorAll(".bts-entry");
       var playPause = null
       // Iterate through the elements
-      elements.forEach(function(element) {
-          // Check if the element has a specific title
-          if (element.getAttribute("title") === "Play/Pause Simulation") {
-            playPause= element;
-              // Dispatch the click event for the matching element
-              playPause.dispatchEvent(new Event('click'));
-          }
+      elements.forEach(function (element) {
+        // Check if the element has a specific title
+        if (element.getAttribute("title") === "Play/Pause Simulation") {
+          playPause = element;
+          // Dispatch the click event for the matching element
+          playPause.dispatchEvent(new Event('click'));
+        }
       });
-      console.log(dropdown.pre);
-      console.log(dropdown.eff);
+
+      console.log("dropdownsql: " + dropdown.sqlEditor.value);
+      const textWithUserInput = await inputVarParser(dropdown.sqlEditor.value);
+      const sql = extractPreAndEffect(textWithUserInput);
+      console.log("preCon: " + sql.pre);
+      console.log("Effect: " + sql.effect);
+
+      //vores pis kode
+      if (sql.pre != undefined) {
+        sql.pre = processVarParser(sql.pre);
+        console.log(sql.pre);
+        let preCon = await handlePreCon(sql.pre);
+        console.log(preCon);
+        try { console.log(preCon.isTrue); } catch (err) { console.error(err); }
+        console.log(preCon.result);
+        if (preCon.isTrue) {
+          try {
+            console.log(typeof sql.effect)
+            sql.effect = await chooseSelRes(sql.effect, preCon.result);
+
+            handleEffect(sql.effect);
+
+          } catch (err) {
+            console.error(err)
+          }
+        }
+      }
+      else {
+        try {
+          handleEffect(sql.effect);
+        } catch (err) {
+          console.error(err)
+        }
+      }
+
+
+
+
+
+
+      //hans pis kode 
       let n;
       if (dropdown.pre != undefined && dropdown.eff != undefined) {
         if (dropdown.pre.isPared && dropdown.eff.isPared) {
           n = await evalPreCondition(dropdown.pre.n, col);
-  
+
           if (n.isTrue != undefined) {
             console.log('Precondition is: ' + n.isTrue);
             if (n.isTrue) {
               let attributeList = [];
-  
+
               if (dropdown.pre.n.includes('SELECT')) {
                 // Extract attributes and table from the SQL SELECT statement
                 const match = /SELECT\s+([^]+?)\s+FROM\s+([^]+?)(?:\s+WHERE|$)/i.exec(dropdown.pre.n);
-  
+
                 if (match) {
                   const attributes = match[1].split(/\s*,\s*/);
                   const tableName = match[2];
-  
+
                   // Combine table name and attributes to form the attribute list
                   const newAttributes = attributes.map(attribute => {
                     // Check if attribute already includes a dot, indicating it's in the format table.attribute
                     return attribute.includes('.') ? attribute : `${tableName}.${attribute}`;
                   });
-  
+
                   // Add the new attributes to the existing attributeList
                   attributeList = attributeList.concat(newAttributes);
                 }
               }
-  
+
               await executeEffects(dropdown.eff.n, n.result, attributeList);
               playPause.dispatchEvent(new Event('click'));
             }
           }
         }
       }
+
       datataskTriggered = false;
       resolve();
     });
   });
-  
+
+  modeler.get('eventBus').on(TOGGLE_MODE_EVENT, (isToggleMode) => {
+    if (isToggleMode.active) {
+      submitButton.style.display = 'none';
+    } else {
+      submitButton.style.display = 'block';
+    }
+  });
 
   dropdown.appendChild(submitButton);
-
-  
 
   return dropdown;
 }
 
-function createButton(func,param,db) {
-  const button = document.createElement('button');
+function createButton(func, param, db) {
+  const wrapper = document.createElement('div');
+  wrapper.style.position = 'relative';
 
+
+  const button = document.createElement('button');
 
   const icon = document.createElement('i');
   icon.className = 'fa-solid fa-caret-down';
   button.appendChild(icon);
   button.className = 'dynamicButton';
 
-  let dropdown =null;
-  if(param==null){
-    dropdown = func();
-  }
-  else {
-    dropdown = func(param,db)
-  }
+  let dropdown = param == null ? func() : func(param, db);
 
   dropdown.style.visibility = 'hidden';
   dropdown.style.pointerEvents = 'none';
-  
-  button.appendChild(dropdown);
-  dropdown.addEventListener('click', (event) => {
+
+  wrapper.appendChild(button);
+  wrapper.appendChild(dropdown);
+
+  dropdown.addEventListener('mousedown', function(event) {
     event.stopPropagation();
   });
-  
-  button.addEventListener('click', () => {
+
+  button.addEventListener('click', function(event) {
+    event.stopPropagation();
+
     if (dropdown.style.visibility === 'hidden') {
       dropdown.style.visibility = 'visible';
       dropdown.style.pointerEvents = 'auto';
-      icon.style.transform='rotate(180deg)';
+      icon.style.transform = 'rotate(180deg)';
     } else {
       dropdown.style.visibility = 'hidden';
       dropdown.style.pointerEvents = 'none';
-      icon.style.transform='rotate(0deg)';
+      icon.style.transform = 'rotate(0deg)';
     }
   });
 
-  return button;
+  return wrapper;
 }
 
-function createCondition(id){
+function createCondition(id) {
   const cond = document.createElement('div')
-  const textarea = document.createElement('textarea');textarea.placeholder='Write condition e.g. #var !=5';textarea.style.width='178px';textarea.style.height='60px';
-  textarea.position='relative';textarea.stopPropagation
-  const evaluate = document.createElement('button'); evaluate.textContent='Evaluate condition'
-  evaluate.addEventListener("click", function(){
-    try{
-      
-      parseExpression(textarea.value,processVar,col)
-      if(messageService.exist(id)!=null){
+  const textarea = document.createElement('textarea'); textarea.placeholder = 'Write condition e.g. #var !=5'; textarea.style.width = '178px'; textarea.style.height = '60px';
+  textarea.position = 'relative'; textarea.stopPropagation
+  const evaluate = document.createElement('button'); evaluate.textContent = 'Evaluate condition'
+  evaluate.addEventListener("click", function () {
+    try {
+
+      parseExpression(textarea.value, processVar, col)
+      if (messageService.exist(id) != null) {
         messageService.remove(id)
       }
-      messageService.add(id,textarea.value)
-    }catch(err){
+      messageService.add(id, textarea.value)
+    } catch (err) {
       alert(err)
     }
   })
 
-  cond.appendChild(textarea);cond.appendChild(evaluate);
+  cond.appendChild(textarea); cond.appendChild(evaluate);
   return cond;
 }
 
 modeler.get('eventBus').on('shape.added', (event) => {
   const shape = event.element;
 
-  /*
-  if(shape.businessObject && shape.businessObject.$instanceOf('bpmn:ExclusiveGateway')) {
-
-   
-    let cond = createButton(createCondition)
-    overlays.add(shape.id, 'note', {
-      position: {
-        bottom: 5,
-        right: 67
-      },
-      show: {
-        minZoom: 0.7
-      },
-      html: cond 
-    });
-  }
-  */
-  
   // Check if the shape is a BPMN element (excluding labels)
-  
-  if (shape.businessObject && shape.businessObject.$instanceOf('ta:DataTask')) {
-    
-    
-    const  businessObject  = getBusinessObject(shape);
 
-   // const extensionElements = businessObject.extensionElements;
+  if (shape.businessObject && shape.businessObject.$instanceOf('ta:DataTask')) {
+
+
+    const businessObject = getBusinessObject(shape);
+
+    // const extensionElements = businessObject.extensionElements;
     let datatask = getExtensionElement(businessObject, 'ta:DataTask');
-    
+
 
     const extensionElements = businessObject.extensionElements || moddle.create('bpmn:ExtensionElements');
 
@@ -737,8 +923,8 @@ modeler.get('eventBus').on('shape.added', (event) => {
     }
 
     console.log(datatask)
-    const button = createButton(createDropdown,shape.id,db);
-   
+    const button = createButton(createDropdown, shape.id, db);
+
     document.getElementById('buttonContainer').appendChild(button);
 
     // Use a unique event name based on the shape's ID
@@ -749,7 +935,7 @@ modeler.get('eventBus').on('shape.added', (event) => {
       modeler.get('eventBus').fire(eventName);
     });
 
-   
+
 
     overlays.add(shape.id, 'note', {
       position: {
@@ -759,15 +945,15 @@ modeler.get('eventBus').on('shape.added', (event) => {
       show: {
         minZoom: 0.7
       },
-      html: button 
+      html: button
     });
 
-    overlays.add(shape.id,"note", {
-      position:{
+    overlays.add(shape.id, "note", {
+      position: {
         bottom: 75,
-        right:95
+        right: 95
       },
-      show:{
+      show: {
         minZoom: 0.7
       },
       html: data_store
@@ -784,7 +970,7 @@ modeler.get('eventBus').on('element.changed', (event) => {
 
   if (/.*data$/.test(element.id)) {
     // Add the button
-    let cond = createButton(createCondition,element.id);
+    let cond = createButton(createCondition, element.id);
     cond.id = element.id + 'cond';
     overlays.add(element.id, 'note', {
       position: {
@@ -813,8 +999,8 @@ modeler.get('eventBus').on('element.added', (event) => {
   console.log(element.id)
   if (/.*data$/.test(element.id)) {
     // Add the button
-    
-    let cond = createButton(createCondition,element.id);
+
+    let cond = createButton(createCondition, element.id);
     cond.id = element.id + 'cond';
     overlays.add(element.id, 'note', {
       position: {
@@ -826,5 +1012,6 @@ modeler.get('eventBus').on('element.added', (event) => {
       },
       html: cond,
     });
-  } 
+  }
 });
+

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Database Tables</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        .table-button {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            cursor: pointer;
+        }
+
+        .table-button:hover {
+            background-color: white;
+            color: #007BFF;
+            border: 1px solid #007BFF;
+        }
+
+        #back-button {
+            margin-top: 20px;
+            display: none;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
+
+        th,
+        td {
+            padding: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2> Database Tables</h2>
+    <div id="table-list"></div>
+
+    <div id="table-data" style="display:none;">
+        <h3 id="table-title"></h3>
+        <table id="table-content"></table>
+        <button id="back-button">← Back to table list</button>
+    </div>
+
+    <script>
+        const tableListEl = document.getElementById("table-list");
+        const tableDataEl = document.getElementById("table-data");
+        const tableTitle = document.getElementById("table-title");
+        const tableContent = document.getElementById("table-content");
+        const backButton = document.getElementById("back-button");
+
+        function checkIfPrimaryAndForeignKey(header, primaryKeys, foreignKeys) {
+            var headerReturned = header;
+            for (const pk of primaryKeys) {
+                if (header === pk.primaryKey) {
+                    headerReturned += `(PK)`;
+                }
+            }
+            for (const fk of foreignKeys) {
+                if (header === fk.foreignKey) {
+                    headerReturned += `(FK → ${fk.tableName})`;
+                }
+            }
+
+            return headerReturned;
+        }
+
+
+        async function loadTables() {
+            const res = await fetch('http://localhost:3000/api/allTables');
+            const tables = await res.json();
+
+            tableListEl.innerHTML = '';
+            tables.forEach(table => {
+                const btn = document.createElement("button");
+                btn.className = "table-button";
+                btn.textContent = table;
+                btn.onclick = () => loadTableData(table);
+                tableListEl.appendChild(btn);
+            });
+        }
+
+        async function loadTableData(tableName) {
+            const res = await fetch(`http://localhost:3000/api/table/${tableName}`);
+            const rows = await res.json();
+
+            const primaryKeyRes = await fetch(`http://localhost:3000/api/getPrimaryKey/${tableName}`);
+            const primaryKeys = await primaryKeyRes.json();
+            console.log(primaryKeys);
+
+            const foreignKeyRes = await fetch(`http://localhost:3000/api/getForeignKeys/${tableName}`);
+            const foreignKeys = await foreignKeyRes.json();
+            console.log(foreignKeys);
+
+            tableListEl.style.display = "none";
+            tableDataEl.style.display = "block";
+            backButton.style.display = "inline-block";
+
+            tableTitle.textContent = `Rows in "${tableName}"`;
+            tableContent.innerHTML = '';
+
+            if (rows.length === 0) {
+                tableContent.innerHTML = '<tr><td>No data</td></tr>';
+                return;
+            }
+
+            const headers = Object.keys(rows[0]);
+
+            const headerRow = document.createElement('tr');
+            console.log(headers);
+            headers.forEach(h => {
+                const th = document.createElement('th');
+
+
+                th.textContent = checkIfPrimaryAndForeignKey(h, primaryKeys, foreignKeys);
+                headerRow.appendChild(th);
+            });
+            tableContent.appendChild(headerRow);
+
+            rows.forEach(row => {
+
+                const tr = document.createElement('tr');
+                headers.forEach(h => {
+
+                    const td = document.createElement('td');
+                    td.textContent = row[h];
+                    tr.appendChild(td);
+                });
+                tableContent.appendChild(tr);
+            });
+        }
+
+        backButton.addEventListener("click", () => {
+            tableDataEl.style.display = "none";
+            tableListEl.style.display = "block";
+        });
+
+        loadTables();
+    </script>
+
+</body>
+
+</html>

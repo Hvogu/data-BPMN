@@ -2,3 +2,6 @@ coverage
 example/dist
 node_modules
 tmp
+ERD-diagram/*.svg
+ERD-diagram/*.dot
+ERD-diagram/*.json
