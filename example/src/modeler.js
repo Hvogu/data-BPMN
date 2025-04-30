@@ -541,32 +541,28 @@ async function simulateProcess() {
 
 
 
-      if (!textarea.value) {
-        alert('non empty SQL statement required');
-        document.querySelector('.bts-toggle-mode').dispatchEvent(new Event('click'));
-        modeler.get('eventBus').fire(RESET_SIMULATION_EVENT);
-      } else {
-        const execute = document.getElementById(`${result.element.id}exe`);
-        await simulateExecution(result.element.id);
 
-        // ✅ NEW: Pause if needed
-        while (isPaused) {
-          console.log('Simulation paused...waiting for fix.');
-          await new Promise(resolve => setTimeout(resolve, 100));
-        }
-        console.log('Simulation step complete:', result.element.id);
+      const execute = document.getElementById(`${result.element.id}exe`);
+      await simulateExecution(result.element.id);
 
-        simCall = false;
-        console.log('Simulation completed successfully!');
-
-        modeler.get('eventBus').fire('tokenSimulation.simulator.trace', {
-          element: result.element,
-          scope: result.scope
-        });
-        console.log('Element exited successfully!');
-
-        // Additional actions to be performed after the button click event
+      // ✅ NEW: Pause if needed
+      while (isPaused) {
+        console.log('Simulation paused...waiting for fix.');
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
+      console.log('Simulation step complete:', result.element.id);
+
+      simCall = false;
+      console.log('Simulation completed successfully!');
+
+      modeler.get('eventBus').fire('tokenSimulation.simulator.trace', {
+        element: result.element,
+        scope: result.scope
+      });
+      console.log('Element exited successfully!');
+
+      // Additional actions to be performed after the button click event
+
     } catch (error) {
       // Handle errors here
       console.error('Error:', error);
