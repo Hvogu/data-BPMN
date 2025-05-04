@@ -15,7 +15,7 @@ import messageService from './messageService';
 import { evalPreCondition, executeEffects } from '../../lib/custom/parsers/effExuecute.js'
 
 
-import { PauseIcon, PlayIcon } from '../../lib/icons/index.js';
+import { PauseIcon, PlayIcon, ExclamationTriangleIcon } from '../../lib/icons/index.js';
 import { getLogger } from '../../lib/features/log/logger.js';
 import { getCurrentScope } from '../../lib/features/log/Log.js';
 
@@ -666,6 +666,7 @@ function waitForUserCorrection(elementId, resolve) {
   const popup = document.getElementById('custom-sql-popup');
   const textarea = document.getElementById('custom-sql-textarea');
   const confirmButton = document.getElementById('custom-sql-confirm');
+  const cancelButton = document.getElementById('custom-sql-cancel');
   const dropdown = document.getElementById(`${elementId}drop`);
   const sqlEditor = dropdown?.querySelector('textarea');
   textarea.value = sqlEditor.value; // Clear previous value
@@ -703,6 +704,25 @@ function waitForUserCorrection(elementId, resolve) {
 
     resolve(); // <-- Important: Only resolve AFTER correction
   }
+
+  cancelButton.onclick = function () {
+
+    getLogger().log({
+      text: "Simulation Cancelled...Reseting!",
+      icon: ExclamationTriangleIcon(),
+      scope: getCurrentScope()
+    });
+
+    popup.style.display = 'none';
+
+    setTimeout(() => {
+      isRunning = false;
+      hasPaused = true;
+      modeler.get('eventBus').fire('tokenSimulation.resetSimulation');
+      resolve(); // Resolve after delay
+      simulationSupport.toggleSimulation(false);
+    }, 2000); // 3000 milliseconds = 3 seconds
+  }
 }
 
 
@@ -713,11 +733,11 @@ function createDropdown(param, db) {
   dropdown.id = param + 'drop';
   getTextBoxes(dropdown, modeler.get('eventBus'));
 
-  dropdown.addEventListener('mousedown', function(event) {
+  dropdown.addEventListener('mousedown', function (event) {
     event.stopPropagation();
   });
 
-  dropdown.addEventListener('click', function(event) {
+  dropdown.addEventListener('click', function (event) {
     event.stopPropagation();
   });
 
@@ -861,11 +881,11 @@ function createButton(func, param, db) {
   wrapper.appendChild(button);
   wrapper.appendChild(dropdown);
 
-  dropdown.addEventListener('mousedown', function(event) {
+  dropdown.addEventListener('mousedown', function (event) {
     event.stopPropagation();
   });
 
-  button.addEventListener('click', function(event) {
+  button.addEventListener('click', function (event) {
     event.stopPropagation();
 
     if (dropdown.style.visibility === 'hidden') {
