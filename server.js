@@ -125,7 +125,7 @@ app.get("/api/selQry", async (req, res) => {
         res.json(rows);
     } catch (error) {
         console.error("❌ Error fetching table:", error);
-        res.status(500).json({ error: "Failed to fetch table data" });
+        res.status(500).json({ error: error.message });
     }
 });
 

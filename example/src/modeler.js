@@ -15,7 +15,7 @@ import messageService from './messageService';
 import { evalPreCondition, executeEffects } from '../../lib/custom/parsers/effExuecute.js'
 
 
-import { PauseIcon, PlayIcon, ExclamationTriangleIcon } from '../../lib/icons/index.js';
+import { PauseIcon, PlayIcon, ExclamationTriangleIcon, CheckCircleIcon } from '../../lib/icons/index.js';
 import { getLogger } from '../../lib/features/log/logger.js';
 import { getCurrentScope } from '../../lib/features/log/Log.js';
 
@@ -620,17 +620,30 @@ async function simulateExecution(elementId) {
 
       if (sql.pre != undefined) {
         sql.pre = processVarParser(sql.pre);
+
         let preCon = await handlePreCon(sql.pre);
 
         if (preCon.isTrue) {
           sql.effect = await chooseSelRes(sql.effect, preCon.result);
 
-
+          getLogger().log({
+            text: "Precondition True: executing effect",
+            icon: CheckCircleIcon(),
+            scope: getCurrentScope()
+          });
 
           await handleEffect(sql.effect);
           modeler.get('eventBus').fire('tokenSimulation.playSimulation');
           resolve(); // Move only if successful
 
+        } else {
+          getLogger().log({
+            text: "Precondition false: ignoring effect",
+            icon: TimesCircleIcon(),
+            scope: getCurrentScope()
+          });
+          modeler.get('eventBus').fire('tokenSimulation.playSimulation');
+          resolve(); // Move only if successful
         }
       } else {
 
