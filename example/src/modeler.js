@@ -265,7 +265,7 @@ async function updateQueryFieldById(elementId, text1, text2) {
 
 function updateConditionFieldById(elementId, text) {
   const element = modeler.get('elementRegistry').get(elementId);
-  if(element){
+  if (element) {
 
     modeling.updateProperties(element, {
       text: text
@@ -563,56 +563,66 @@ window.onload = function () {
 };
 
 
+let simulationLoop = null;
 
 // You might want to put the simulation process in a function or event handler
 async function simulateProcess() {
 
 
-
-
-
-  while (isRunning) {
-    try {
-      simCall = true;
-      const result = await simulationSupport.elementEnter('ta:DataTask');
-      console.log('Simulation result:', result);
-
-
-      const datatask = document.getElementById(`${result.element.id}drop`);
-
-      const textarea = document.getElementById(`${datatask.id}sql`);
-
-
-
-
-      const execute = document.getElementById(`${result.element.id}exe`);
-      await simulateExecution(result.element.id);
-
-      // ✅ NEW: Pause if needed
-      while (isPaused) {
-        console.log('Simulation paused...waiting for fix.');
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-      console.log('Simulation step complete:', result.element.id);
-
-      simCall = false;
-      console.log('Simulation completed successfully!');
-
-      modeler.get('eventBus').fire('tokenSimulation.simulator.trace', {
-        element: result.element,
-        scope: result.scope
-      });
-      console.log('Element exited successfully!');
-
-      // Additional actions to be performed after the button click event
-
-    } catch (error) {
-      // Handle errors here
-      console.error('Error:', error);
-    } finally {
-      document.getElementById('bobr').style.pointerEvents = 'auto';
-    }
+  if (simulationLoop) {
+    console.warn('Simulation already running!');
+    return;
   }
+
+
+  simulationLoop = (async () => {
+    while (isRunning) {
+      try {
+        simCall = true;
+        const result = await simulationSupport.elementEnter('ta:DataTask');
+        console.log('Simulation result:', result);
+
+
+        const datatask = document.getElementById(`${result.element.id}drop`);
+
+        const textarea = document.getElementById(`${datatask.id}sql`);
+
+
+
+
+        const execute = document.getElementById(`${result.element.id}exe`);
+        await simulateExecution(result.element.id);
+
+        // ✅ NEW: Pause if needed
+        while (isPaused) {
+          console.log('Simulation paused...waiting for fix.');
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        console.log('Simulation step complete:', result.element.id);
+
+        simCall = false;
+        console.log('Simulation completed successfully!');
+
+        modeler.get('eventBus').fire('tokenSimulation.simulator.trace', {
+          element: result.element,
+          scope: result.scope
+        });
+        console.log('Element exited successfully!');
+
+        // Additional actions to be performed after the button click event
+
+      } catch (error) {
+        // Handle errors here
+        console.error('Error:', error);
+      } finally {
+        document.getElementById('bobr').style.pointerEvents = 'auto';
+      }
+    }
+
+
+    simulationLoop = null; // ✅ Clear when exiting
+  })();
+
 }
 
 
@@ -776,6 +786,15 @@ function waitForUserCorrection(elementId, resolve) {
   }
 }
 
+export function resetSimInModeller() {
+  console.warn('Resetting simulation from resetSimInModeller()');
+  isRunning = false;
+  simCall = false;
+
+  modeler.get('eventBus').fire('tokenSimulation.resetSimulation');
+  simulationSupport.toggleSimulation(false);
+  console.log('Simulation reset successfully!');
+}
 
 
 function createDropdown(param, db) {
@@ -802,7 +821,7 @@ function createDropdown(param, db) {
     return new Promise(async (resolve) => {
 
       while (datataskTriggered) {
-        await new Promise(resolve => setTimeout(resolve, 100)); 
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
       datataskTriggered = true;
 
