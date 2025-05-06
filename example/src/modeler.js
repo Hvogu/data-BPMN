@@ -183,6 +183,25 @@ async function openDiagram(diagram) {
         document.getElementById(element.id + 'drop').sqlEditor.value = element.businessObject.text;
         document.getElementById(element.id + 'drop').label.textContent = element.businessObject.text;
       }
+      else if ((/.*data$/.test(element.id))) {
+        //debugger
+        console.log('Data task element found:', element.businessObject);
+        console.log('Data task element found:', element.id);
+        let cond = createButton(createCondition, element.id);
+        cond.id = element.id + 'cond';
+        console.log(cond.id, 'cond id')
+        overlays.add(element.id, 'note', {
+          position: {
+            bottom: 6,
+            right: 67,
+          },
+          show: {
+            minZoom: 0.7,
+          },
+          html: cond,
+        });
+        document.getElementById(element.id + 'cond').querySelector('textarea').value = element.businessObject.$attrs.text;
+      }
     });
 
     console.log('Diagram loaded and elements parsed.');
@@ -244,6 +263,15 @@ async function updateQueryFieldById(elementId, text1, text2) {
   }
 }
 
+function updateConditionFieldById(elementId, text) {
+  const element = modeler.get('elementRegistry').get(elementId);
+  if(element){
+
+    modeling.updateProperties(element, {
+      text: text
+    });
+  }
+}
 
 function getExtensionElement(element, type) {
   if (!element.extensionElements) {
@@ -257,6 +285,16 @@ function getExtensionElement(element, type) {
 
 // Function to download the BPMN diagram
 async function downloadDiagram() {
+  const elementRegistry = modeler.get('elementRegistry');
+
+  elementRegistry.forEach((element) => {
+    if (/.*data$/.test(element.id) && document.getElementById(element.id + 'cond') !== null) {
+      const condtext = document.getElementById(element.id + 'cond').querySelector('textarea').value;
+      console.log(condtext);
+      updateConditionFieldById(element.id, condtext);
+    }
+  });
+
   for (var i = 0; i < dataTask_list.length; i++) {
     let text1 = document.getElementById(dataTask_list[i]).sqlEditor.value;
 
@@ -764,7 +802,7 @@ function createDropdown(param, db) {
     return new Promise(async (resolve) => {
 
       while (datataskTriggered) {
-        await new Promise(resolve => setTimeout(resolve, 100)); // Adjust the polling interval as needed
+        await new Promise(resolve => setTimeout(resolve, 100)); 
       }
       datataskTriggered = true;
 
@@ -885,10 +923,11 @@ function createButton(func, param, db) {
   icon.className = 'fa-solid fa-caret-down';
   button.appendChild(icon);
   button.className = 'dynamicButton';
+  button.style.width = '30px';
 
   let dropdown = param == null ? func() : func(param, db);
 
-  dropdown.style.visibility = 'hidden';
+  dropdown.style.display = 'none';
   dropdown.style.pointerEvents = 'none';
 
   wrapper.appendChild(button);
@@ -901,12 +940,12 @@ function createButton(func, param, db) {
   button.addEventListener('click', function (event) {
     event.stopPropagation();
 
-    if (dropdown.style.visibility === 'hidden') {
-      dropdown.style.visibility = 'visible';
+    if (dropdown.style.display === 'none') {
+      dropdown.style.display = 'block';
       dropdown.style.pointerEvents = 'auto';
       icon.style.transform = 'rotate(180deg)';
     } else {
-      dropdown.style.visibility = 'hidden';
+      dropdown.style.display = 'none';
       dropdown.style.pointerEvents = 'none';
       icon.style.transform = 'rotate(0deg)';
     }
@@ -916,6 +955,7 @@ function createButton(func, param, db) {
 }
 
 function createCondition(id) {
+  const parent = document.getElementById(id);
   const cond = document.createElement('div')
   const textarea = document.createElement('textarea'); textarea.placeholder = 'Write condition e.g. #var !=5'; textarea.style.width = '178px'; textarea.style.height = '60px';
   textarea.position = 'relative'; textarea.stopPropagation
@@ -933,7 +973,29 @@ function createCondition(id) {
     }
   })
 
-  cond.appendChild(textarea); cond.appendChild(evaluate);
+  const label = document.createElement('label');
+  label.style.display = 'none';
+  label.textContent = textarea.value;
+
+
+  modeler.get('eventBus').on(TOGGLE_MODE_EVENT, (isToggleMode) => {
+    if (isToggleMode.active) {
+      textarea.style.display = 'none';
+      label.style.display = 'inline-block';
+      label.textContent = textarea.value;
+      label.classList.add('label-expanded');
+      evaluate.style.display = 'none';
+    } else {
+      evaluate.style.display = 'block';
+      textarea.style.display = 'block';
+      label.style.display = 'none';
+      label.classList.remove('label-expanded'); // Remove the CSS class
+    }
+  });
+
+  cond.appendChild(textarea);
+  cond.appendChild(evaluate);
+  cond.appendChild(label);
   return cond;
 }
 
@@ -1002,11 +1064,22 @@ modeler.get('eventBus').on('shape.added', (event) => {
 
 modeler.get('eventBus').on('element.changed', (event) => {
   const element = event.element;
+  console.log('ElementID:', element.id);
 
-  if (/.*data$/.test(element.id)) {
-    // Add the button
+  // Check if the element still exists in the elementRegistry
+  const elementRegistry = modeler.get('elementRegistry');
+  const existingElement = elementRegistry.get(element.id);
+
+  if (!existingElement) {
+    console.log(`Element with ID ${element.id} was deleted.`);
+    return;
+  }
+  // Existing logic for handling changes
+  if (/.*data$/.test(element.id) && document.getElementById(element.id + 'cond') === null) {
+
     let cond = createButton(createCondition, element.id);
     cond.id = element.id + 'cond';
+    console.log(cond.id, 'cond id')
     overlays.add(element.id, 'note', {
       position: {
         bottom: 6,
@@ -1017,36 +1090,17 @@ modeler.get('eventBus').on('element.changed', (event) => {
       },
       html: cond,
     });
-  } else if (/^SequenceFlow.*/.test(element.id)) {
-    // Remove the button
+  } else if (/^Flow.*/.test(element.id) && !/.*data$/.test(element.id) && !/.*label$/.test(element.id)) {
+    // console.log('SequenceFlow element changed:', element.id);
     const buttonId = element.id + 'datacond';
     const button = document.getElementById(buttonId);
-
+    const buttons = document.querySelectorAll(`#${buttonId}`);
+    console.log('buttons:', buttons.length);
+    // console.log('Checking button:', buttonId, button ? 'Found' : 'Not Found');
     if (button) {
+      // debugger
+      // console.log('Removing button:', buttonId);
       button.remove();
     }
   }
 });
-
-
-modeler.get('eventBus').on('element.added', (event) => {
-  const element = event.element;
-  console.log(element.id)
-  if (/.*data$/.test(element.id)) {
-    // Add the button
-
-    let cond = createButton(createCondition, element.id);
-    cond.id = element.id + 'cond';
-    overlays.add(element.id, 'note', {
-      position: {
-        bottom: 6,
-        right: 67,
-      },
-      show: {
-        minZoom: 0.7,
-      },
-      html: cond,
-    });
-  }
-});
-
