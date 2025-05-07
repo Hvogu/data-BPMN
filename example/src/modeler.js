@@ -184,9 +184,7 @@ async function openDiagram(diagram) {
         document.getElementById(element.id + 'drop').label.textContent = element.businessObject.text;
       }
       else if ((/.*data$/.test(element.id))) {
-        //debugger
-        console.log('Data task element found:', element.businessObject);
-        console.log('Data task element found:', element.id);
+        
         let cond = createButton(createCondition, element.id);
         cond.id = element.id + 'cond';
         console.log(cond.id, 'cond id')
@@ -286,7 +284,7 @@ function getExtensionElement(element, type) {
 // Function to download the BPMN diagram
 async function downloadDiagram() {
   const elementRegistry = modeler.get('elementRegistry');
-
+  
   elementRegistry.forEach((element) => {
     if (/.*data$/.test(element.id) && document.getElementById(element.id + 'cond') !== null) {
       const condtext = document.getElementById(element.id + 'cond').querySelector('textarea').value;
@@ -294,6 +292,10 @@ async function downloadDiagram() {
       updateConditionFieldById(element.id, condtext);
     }
   });
+
+  console.log('DataTask list:', dataTask_list);
+
+  dataTask_list = dataTask_list.filter(item => document.getElementById(item) !== null);
 
   for (var i = 0; i < dataTask_list.length; i++) {
     let text1 = document.getElementById(dataTask_list[i]).sqlEditor.value;
@@ -655,7 +657,7 @@ function extractPreAndEffect(input) {
 }
 
 async function simulateExecution(elementId) {
-
+// debugger
   return new Promise(async (resolve) => {
     modeler.get('eventBus').fire('tokenSimulation.pauseSimulation');
 
@@ -815,7 +817,6 @@ function createDropdown(param, db) {
   submitButton.textContent = 'Execute';
   submitButton.id = param + 'exe';
   dataTask_list.push(param + 'drop');
-  console.log(submitButton.id);
 
   submitButton.addEventListener('click', async function () {
     return new Promise(async (resolve) => {
@@ -846,14 +847,9 @@ function createDropdown(param, db) {
       //vores pis kode
       if (sql.pre != undefined) {
         sql.pre = processVarParser(sql.pre);
-        console.log(sql.pre);
         let preCon = await handlePreCon(sql.pre);
-        console.log(preCon);
-        try { console.log(preCon.isTrue); } catch (err) { console.error(err); }
-        console.log(preCon.result);
         if (preCon.isTrue) {
           try {
-            console.log(typeof sql.effect)
             sql.effect = await chooseSelRes(sql.effect, preCon.result);
 
             handleEffect(sql.effect);
@@ -1004,6 +1000,7 @@ function createCondition(id) {
       label.textContent = textarea.value;
       label.classList.add('label-expanded');
       evaluate.style.display = 'none';
+      messageService.add(id, textarea.value)
     } else {
       evaluate.style.display = 'block';
       textarea.style.display = 'block';
@@ -1083,14 +1080,12 @@ modeler.get('eventBus').on('shape.added', (event) => {
 
 modeler.get('eventBus').on('element.changed', (event) => {
   const element = event.element;
-  console.log('ElementID:', element.id);
 
   // Check if the element still exists in the elementRegistry
   const elementRegistry = modeler.get('elementRegistry');
   const existingElement = elementRegistry.get(element.id);
 
   if (!existingElement) {
-    console.log(`Element with ID ${element.id} was deleted.`);
     return;
   }
   // Existing logic for handling changes
@@ -1098,7 +1093,6 @@ modeler.get('eventBus').on('element.changed', (event) => {
 
     let cond = createButton(createCondition, element.id);
     cond.id = element.id + 'cond';
-    console.log(cond.id, 'cond id')
     overlays.add(element.id, 'note', {
       position: {
         bottom: 6,
@@ -1110,15 +1104,10 @@ modeler.get('eventBus').on('element.changed', (event) => {
       html: cond,
     });
   } else if (/^Flow.*/.test(element.id) && !/.*data$/.test(element.id) && !/.*label$/.test(element.id)) {
-    // console.log('SequenceFlow element changed:', element.id);
     const buttonId = element.id + 'datacond';
     const button = document.getElementById(buttonId);
     const buttons = document.querySelectorAll(`#${buttonId}`);
-    console.log('buttons:', buttons.length);
-    // console.log('Checking button:', buttonId, button ? 'Found' : 'Not Found');
     if (button) {
-      // debugger
-      // console.log('Removing button:', buttonId);
       button.remove();
     }
   }
