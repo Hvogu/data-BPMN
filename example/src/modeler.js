@@ -1017,7 +1017,7 @@ function createCondition(id) {
 
 modeler.get('eventBus').on('shape.added', (event) => {
   const shape = event.element;
-  //debugger
+  // debugger
 
   // Check if the shape is a BPMN element (excluding labels)
 
