@@ -15,7 +15,7 @@ import messageService from './messageService';
 import { evalPreCondition, executeEffects } from '../../lib/custom/parsers/effExuecute.js'
 
 
-import { PauseIcon, PlayIcon, ExclamationTriangleIcon, CheckCircleIcon } from '../../lib/icons/index.js';
+import { PauseIcon, PlayIcon, ExclamationTriangleIcon, CheckCircleIcon, TimesCircleIcon } from '../../lib/icons/index.js';
 import { getLogger } from '../../lib/features/log/logger.js';
 import { getCurrentScope } from '../../lib/features/log/Log.js';
 
@@ -184,7 +184,7 @@ async function openDiagram(diagram) {
         document.getElementById(element.id + 'drop').label.textContent = element.businessObject.text;
       }
       else if ((/.*data$/.test(element.id))) {
-        
+
         let cond = createButton(createCondition, element.id);
         cond.id = element.id + 'cond';
         console.log(cond.id, 'cond id')
@@ -284,7 +284,7 @@ function getExtensionElement(element, type) {
 // Function to download the BPMN diagram
 async function downloadDiagram() {
   const elementRegistry = modeler.get('elementRegistry');
-  
+
   elementRegistry.forEach((element) => {
     if (/.*data$/.test(element.id) && document.getElementById(element.id + 'cond') !== null) {
       const condtext = document.getElementById(element.id + 'cond').querySelector('textarea').value;
@@ -657,22 +657,25 @@ function extractPreAndEffect(input) {
 }
 
 async function simulateExecution(elementId) {
-// debugger
+  // debugger
   return new Promise(async (resolve) => {
     modeler.get('eventBus').fire('tokenSimulation.pauseSimulation');
 
     try {
+
       const dropdown = document.getElementById(`${elementId}drop`);
       const textWithUserInput = await inputVarParser(dropdown.sqlEditor.value);
       const sql = extractPreAndEffect(textWithUserInput);
 
-
+      console.log("preCon: " + sql.pre);
+      console.log("Effect: " + sql.effect);
 
       if (sql.pre != undefined) {
+
         sql.pre = processVarParser(sql.pre);
-
+        console.log("cleared processVarParser")
         let preCon = await handlePreCon(sql.pre);
-
+        console.log("cleared handlePreCon")
         if (preCon.isTrue) {
           sql.effect = await chooseSelRes(sql.effect, preCon.result);
 
@@ -704,7 +707,7 @@ async function simulateExecution(elementId) {
 
       }
     } catch (error) {
-      console.error('Effect failed, waiting for user fix.');
+      console.error('Effect failed, waiting for user fix.', error);
       // WAIT for user to confirm new query
 
       waitForUserCorrection(elementId, resolve);
