@@ -1000,6 +1000,7 @@ function createCondition(id) {
       label.textContent = textarea.value;
       label.classList.add('label-expanded');
       evaluate.style.display = 'none';
+      messageService.remove(id)
       messageService.add(id, textarea.value)
     } else {
       evaluate.style.display = 'block';
