@@ -243,6 +243,10 @@ async function openDiagram(diagram) {
     document.getElementById('processButton').click();
 
     console.log('Diagram loaded and elements parsed.');
+    //jesper
+    simulationSupport.toggleSimulation(true);
+
+
   } catch (err) {
     console.error('Error loading diagram:', err.message, err.warnings);
   }
@@ -602,7 +606,9 @@ window.addEventListener('click', (event) => {
 const simulationSupport = modeler.get('simulationSupport');
 
 // Enable simulation
-simulationSupport.toggleSimulation(true);
+//jesper
+
+//simulationSupport.toggleSimulation(true);
 let isRunning = true;
 let simCall = false
 window.onload = function () {
