@@ -639,7 +639,7 @@ window.onload = function () {
 };
 
 //starter den i false til at starte med - Jesper 
-simulationSupport.toggleSimulation(false);
+//simulationSupport.toggleSimulation(false);
 let simulationLoop = null;
 
 // You might want to put the simulation process in a function or event handler
