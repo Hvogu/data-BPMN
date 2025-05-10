@@ -41,7 +41,7 @@ let con = false;
 import fileDrop from 'file-drops';
 import fileOpen from 'file-open';
 import download from 'downloadjs';
-import exampleXML from '../resources/example.bpmn';
+import exampleXML from '../resources/jobApplication.bpmn';
 import { has } from 'min-dash';
 import { RESET_SIMULATION_EVENT, TOGGLE_MODE_EVENT } from '../../lib/util/EventHelper.js';
 import { event } from 'min-dom';
@@ -99,6 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     console.log(processVar);
   });
+  processButton.click();
 });
 
 document.getElementById('process-button').addEventListener("click", function () {
@@ -158,7 +159,27 @@ const modeler = new BpmnModeler({
     bindTo: document
   },
   moddleExtensions: {
-    ta: taPackage
+    ta: taPackage,
+    custom: {
+      "name": "Custom",
+      "uri": "http://example.com/custom",
+      "prefix": "custom",
+      "xml": {
+        "tagAlias": "lowerCase"
+      },
+      "types": [
+        {
+          "name": "VariableInput",
+          "superClass": ["Element"],
+          "properties": [
+            {
+              "name": "value",
+              "type": "String"
+            }
+          ]
+        }
+      ]
+    }
   }
 
 });
@@ -201,6 +222,25 @@ async function openDiagram(diagram) {
         document.getElementById(element.id + 'cond').querySelector('textarea').value = element.businessObject.$attrs.text;
       }
     });
+
+    const extensionElements = modeler.getDefinitions().extensionElements;
+    if (extensionElements) {
+      const variableInputElement = extensionElements.values.find(
+        (el) => el.$type === 'custom:VariableInput'
+      );
+      if (variableInputElement) {
+        document.getElementById('variableInput').value = variableInputElement.value || '';
+        console.log('Variable input loaded:', variableInputElement.value);
+      } else {
+        document.getElementById('variableInput').value = '';
+        console.log('No variable input found in extension elements.');
+      }
+    } else {
+      document.getElementById('variableInput').value = '';
+      console.log('No extension elements found.');
+    }
+    
+    document.getElementById('processButton').click();
 
     console.log('Diagram loaded and elements parsed.');
   } catch (err) {
@@ -283,13 +323,20 @@ function getExtensionElement(element, type) {
 
 // Function to download the BPMN diagram
 async function downloadDiagram() {
+  
   const elementRegistry = modeler.get('elementRegistry');
 
   elementRegistry.forEach((element) => {
     if (/.*data$/.test(element.id) && document.getElementById(element.id + 'cond') !== null) {
       const condtext = document.getElementById(element.id + 'cond').querySelector('textarea').value;
       console.log(condtext);
-      updateConditionFieldById(element.id, condtext);
+      try {
+        updateConditionFieldById(element.id, condtext);
+      }
+      catch (err) {
+        console.error('Error updating condition field:', err);
+        
+      }
     }
   });
 
@@ -304,6 +351,29 @@ async function downloadDiagram() {
     updateQueryFieldById(dataTask_list[i].slice(0, -4), text1);
   }
 
+  let extensionElements = modeler.getDefinitions().extensionElements;
+  if (!extensionElements) {
+    extensionElements = moddle.create('bpmn:ExtensionElements', {
+      values: []
+    });
+    modeler.getDefinitions().extensionElements = extensionElements;
+  }
+  let variableInputElement = extensionElements.values.find(
+    (el) => el.$type === 'custom:VariableInput'
+  );
+
+  if (!variableInputElement) {
+    // Create a new custom element for variableInput
+    variableInputElement = moddle.create('custom:VariableInput', {
+      value: document.getElementById('variableInput').value,
+    });
+    extensionElements.values.push(variableInputElement);
+  } else {
+    // Update the existing custom element
+    variableInputElement.value = document.getElementById('variableInput').value;
+  }
+  console.log(variableInputElement);
+
   try {
     // Use the Promise-based API for saveXML
     const { xml } = await modeler.saveXML({ format: true });
@@ -317,7 +387,11 @@ var downloadButton = document.getElementById('download-button');
 
 // Add a click event listener to the button
 downloadButton.addEventListener('click', function () {
-
+  console.log(TOGGLE_MODE_EVENT.active);
+  if (TOGGLE_MODE_EVENT.active) {
+    alert('Please exit simulation mode before downloading the diagram.');
+    return;
+  }
 
   downloadDiagram();
 });
@@ -643,7 +717,7 @@ let lastFailedDataTaskId = null;
 let isPaused = false;
 
 function extractPreAndEffect(input) {
-  const pattern = /^\s*when\s+(.*?)\s+then\s+(.*)$/i;
+  const pattern = /^\s*when\s+(.*?)\s+then\s+(.*)$/is;
   const match = input.match(pattern);
 
   if (match) {
@@ -657,10 +731,11 @@ function extractPreAndEffect(input) {
 }
 
 async function simulateExecution(elementId) {
-  // debugger
+  debugger
   return new Promise(async (resolve) => {
     modeler.get('eventBus').fire('tokenSimulation.pauseSimulation');
 
+    
     try {
 
       const dropdown = document.getElementById(`${elementId}drop`);
@@ -671,7 +746,6 @@ async function simulateExecution(elementId) {
       console.log("Effect: " + sql.effect);
 
       if (sql.pre != undefined) {
-
         sql.pre = processVarParser(sql.pre);
         console.log("cleared processVarParser")
         let preCon = await handlePreCon(sql.pre);

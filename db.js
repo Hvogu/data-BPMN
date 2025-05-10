@@ -310,6 +310,7 @@ async function createProc(tableName, key, conditions, variableChanges) {
 
     proc += "\nEND ; \n"
     proc += "CALL BulkUpdate();\n"
+    console.log("Procedure created: ", proc);
     return proc;
 }
 
