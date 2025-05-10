@@ -239,7 +239,7 @@ async function openDiagram(diagram) {
       document.getElementById('variableInput').value = '';
       console.log('No extension elements found.');
     }
-    
+
     document.getElementById('processButton').click();
 
     console.log('Diagram loaded and elements parsed.');
@@ -323,7 +323,7 @@ function getExtensionElement(element, type) {
 
 // Function to download the BPMN diagram
 async function downloadDiagram() {
-  
+
   const elementRegistry = modeler.get('elementRegistry');
 
   elementRegistry.forEach((element) => {
@@ -335,7 +335,7 @@ async function downloadDiagram() {
       }
       catch (err) {
         console.error('Error updating condition field:', err);
-        
+
       }
     }
   });
@@ -638,7 +638,8 @@ window.onload = function () {
   document.body.appendChild(myDiv)
 };
 
-
+//starter den i false til at starte med - Jesper 
+simulationSupport.toggleSimulation(false);
 let simulationLoop = null;
 
 // You might want to put the simulation process in a function or event handler
@@ -731,11 +732,11 @@ function extractPreAndEffect(input) {
 }
 
 async function simulateExecution(elementId) {
-  debugger
+
   return new Promise(async (resolve) => {
     modeler.get('eventBus').fire('tokenSimulation.pauseSimulation');
 
-    
+
     try {
 
       const dropdown = document.getElementById(`${elementId}drop`);
@@ -1095,7 +1096,7 @@ function createCondition(id) {
 
 modeler.get('eventBus').on('shape.added', (event) => {
   const shape = event.element;
-  // debugger
+
 
   // Check if the shape is a BPMN element (excluding labels)
 
