@@ -35,24 +35,24 @@ The top left button toggles between the modeler mode and the simulation mode. Th
 The process variables button opens a text field where the user can define process variables in the format ‘#[variable name] : [value]’. The variable names must be unique, and the value can be a number or a string; no quotes are necessary. All variables must be separated with a semicolon. Pressing the process button will instanciate the process variables. The process variables will be saved together with the model and upon opening a model the process variables will automatically be instantiated.
 
 <p align="left">
-  <img src="images/processVar.PNG" width="300" alt="Some Text">
+  <img src="images/processVar2.PNG" width="300" alt="Some Text">
 </p>
 
 The Mariadb button shows a simple overview of all the tables in the database. These tables are clickable and it will show all relations in the selected table. It is only possible to view the database through this feature and not manipulate it. This is of course only available if a database was successfully conected.  
 
 <p align="left">
-  <img src="images/databaseButtonClicked.png" width="500" alt="Some Text"> 
+  <img src="images/DBButton.png" width="500" alt="Some Text"> 
 </p>
 
 
 It is also possible to showcase the database in a new window where it is possible to see primary key(s) as well as foreign key(s) relations. 
 
  <p align="left">
-  <img src="images/databaseNewWindow.png" width="500" alt="Some Text"> 
+  <img src="images/DBWindow.png" width="500" alt="Some Text"> 
 </p>
 
 <p align="left">
-  <img src="images/dbWindowRows.png" width="500" alt="Some Text"> 
+  <img src="images/DBWindowTable.png" width="500" alt="Some Text"> 
 </p>
 
 
@@ -79,15 +79,15 @@ After a successfull select precondition the user will be promted to choose betwe
 If there is no precondition the effect will always be executed.
 
 
-Here is a small example of how input variables are handeled.
+Here is a small example of how data from a select precondition is handeled.
 This query selects all the names and mallid's from store and then assigns the to the process variables #var and #str
 
 <p align="left">
-  <img src="images/assignExample.png" width="300" alt="Some Text"> 
+  <img src="images/selExe.png" width="300" alt="Some Text"> 
 </p>
 
 <p align="left">
-  <img src="images/assignExampleAssign.png" width="300" alt="Some Text"> 
+  <img src="images/selExRes.png" width="300" alt="Some Text"> 
 </p>
 
 
@@ -96,12 +96,12 @@ Primary keys cannot be changed and should not be changed therefore we do not sup
 Our data task also supports user input variables that are written with a @ like _@inputVariable_. When the simulation reaches the datatask it will ask you to fill in your input variables.
 
 <p align="left">
-  <img src="images/assignExampleWithInput.png" width="300" alt="Some Text"> 
+  <img src="images/userInput.png" width="300" alt="Some Text"> 
 </p>
 when the simulation reaches the datatask a popup will appear promting the user to fill in the input variables 
 
 <p align="left">
-  <img src="images/namingVariables.png" width="300" alt="Some Text"> 
+  <img src="images/userInput2.png" width="300" alt="Some Text"> 
 </p>
 
 An example of Insert,Delete,Update,Assign will be shown below. In our examples we will be using a Database over Shopping mall with the revelevant tables of 
@@ -110,7 +110,7 @@ An example of Insert,Delete,Update,Assign will be shown below. In our examples w
 The formal definition of insert is _INSERT a1=v1,...,an=vn INTO R_ where a1..an are the atribute names in table R and v1..vn are values.
 
 <p align="left">
-  <img src="images/insertExample.png" width="300" alt="Some Text"> 
+  <img src="images/insertEx.png" width="300" alt="Some Text"> 
 </p>
 
 
@@ -118,7 +118,7 @@ The formal definition of insert is _INSERT a1=v1,...,an=vn INTO R_ where a1..an 
 The formal definition of delete is _DELETE v1,...,vn FROM R_ where v1..vn are the values of atributes in table R (not every attribute needs to be specified just primary key(s))
 
 <p align="left">
-  <img src="images/deleteExample.png" width="300" alt="Some Text"> 
+  <img src="images/delExe.png" width="300" alt="Some Text"> 
 </p>
 
 ## update
@@ -131,7 +131,7 @@ This will go through the specified table row for row and see if the current row 
 
 An example can be seen below.
 <p align="left">
-  <img src="images/updateExample.png" width="300" alt="Some Text"> 
+  <img src="images/upEx.png" width="300" alt="Some Text"> 
 </p>
   
 Update is case sensitive in the attribute names such as Location and Name.
