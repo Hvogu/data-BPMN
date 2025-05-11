@@ -270,7 +270,6 @@ async function openDiagram(diagram) {
 
 
 
-
     const toggleBtn = document.querySelector('.bts-toggle-mode');
     if (toggleBtn) {
       toggleBtn.click();
