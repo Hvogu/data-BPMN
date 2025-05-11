@@ -35,7 +35,7 @@ The top left button toggles between the modeler mode and the simulation mode. Th
 The process variables button opens a text field where the user can define process variables in the format ‘#[variable name] : [value]’. The variable names must be unique, and the value can be a number or a string; no quotes are necessary. All variables must be separated with a semicolon. Pressing the process button will instanciate the process variables. The process variables will be saved together with the model and upon opening a model the process variables will automatically be instantiated.
 
 <p align="left">
-  <img src="images/processVar2.PNG" width="300" alt="Some Text">
+  <img src="images/processVar2.png" width="300" alt="Some Text">
 </p>
 
 The Mariadb button shows a simple overview of all the tables in the database. These tables are clickable and it will show all relations in the selected table. It is only possible to view the database through this feature and not manipulate it. This is of course only available if a database was successfully conected.  
@@ -44,12 +44,11 @@ The Mariadb button shows a simple overview of all the tables in the database. Th
   <img src="images/DBButton.png" width="500" alt="Some Text"> 
 </p>
 
-
-It is also possible to showcase the database in a new window where it is possible to see primary key(s) as well as foreign key(s) relations. 
-
  <p align="left">
   <img src="images/DBWindow.png" width="500" alt="Some Text"> 
 </p>
+
+It is also possible to showcase the database in a new window where it is possible to see primary key(s) as well as foreign key(s) relations.
 
 <p align="left">
   <img src="images/DBWindowTable.png" width="500" alt="Some Text"> 
@@ -83,7 +82,7 @@ Here is a small example of how data from a select precondition is handeled.
 This query selects all the names and mallid's from store and then assigns the to the process variables #var and #str
 
 <p align="left">
-  <img src="images/selExe.png" width="300" alt="Some Text"> 
+  <img src="images/selEx.png" width="300" alt="Some Text"> 
 </p>
 
 <p align="left">
@@ -98,7 +97,7 @@ Our data task also supports user input variables that are written with a @ like 
 <p align="left">
   <img src="images/userInput.png" width="300" alt="Some Text"> 
 </p>
-when the simulation reaches the datatask a popup will appear promting the user to fill in the input variables 
+When the simulation reaches the datatask a popup will appear promting the user to fill in the input variables 
 
 <p align="left">
   <img src="images/userInput2.png" width="300" alt="Some Text"> 
@@ -118,7 +117,7 @@ The formal definition of insert is _INSERT a1=v1,...,an=vn INTO R_ where a1..an 
 The formal definition of delete is _DELETE v1,...,vn FROM R_ where v1..vn are the values of atributes in table R (not every attribute needs to be specified just primary key(s))
 
 <p align="left">
-  <img src="images/delExe.png" width="300" alt="Some Text"> 
+  <img src="images/delEx.png" width="300" alt="Some Text"> 
 </p>
 
 ## update
@@ -141,11 +140,11 @@ Another custom component is the conditional flow. This adds conditions to the se
 Custom control flow is added using the element menu by clicking on an edge. 
 
 <p align="left">
-  <img src="images/cond.PNG" width="300" alt="Some Text">
+  <img src="images/cond.png" width="300" alt="Some Text">
 </p>
 
 <p align="left">
-  <img src="images/condfull.PNG" width="300" alt="Some Text">
+  <img src="images/condfull.png" width="300" alt="Some Text">
 </p>
 
 
