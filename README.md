@@ -140,11 +140,11 @@ Another custom component is the conditional flow. This adds conditions to the se
 Custom control flow is added using the element menu by clicking on an edge. 
 
 <p align="left">
-  <img src="images/cond.png" width="300" alt="Some Text">
+  <img src="images/cond1.png" width="300" alt="Some Text">
 </p>
 
 <p align="left">
-  <img src="images/condfull.png" width="300" alt="Some Text">
+  <img src="images/cond2.png" width="300" alt="Some Text">
 </p>
 
 
@@ -166,7 +166,7 @@ A popup will then appear, giving you the ability to edit the failed sql query an
 The simulation has a logger that logs all the steps taken in the simulation. The logger on our part focuses on the datatasks and will log if a query succeeded or failed. If it failed it will return the given error from the database. It also logs when the database queries fails or succeeds it also notifies when the simulation pauses and continues from a failed query.
 
 <p align="left">
-  <img src="images/logger.PNG" width="300" alt="Some Text">
+  <img src="images/logger.png" width="300" alt="Some Text">
 </p>
 
 # Clone, Build and Run
