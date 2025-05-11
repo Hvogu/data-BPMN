@@ -195,14 +195,19 @@ async function openDiagram(diagram) {
     // Access the element registry
     const elementRegistry = modeler.get('elementRegistry');
 
+    const dataTaskPromises = [];
     // Iterate over all elements in the diagram
     elementRegistry.forEach((element) => {
       // console.log('Element ID:', element.type);
       // Check if the element is of a data task
       if (element.businessObject && element.businessObject.$instanceOf('ta:DataTask')) {
-        // Custom parsing logic for the element
-        document.getElementById(element.id + 'drop').sqlEditor.value = element.businessObject.text;
-        document.getElementById(element.id + 'drop').label.textContent = element.businessObject.text;
+        const p = new Promise(resolve => {
+          // Custom parsing logic for the element
+          document.getElementById(element.id + 'drop').sqlEditor.value = element.businessObject.text;
+          document.getElementById(element.id + 'drop').label.textContent = element.businessObject.text;
+          resolve();
+        });
+        dataTaskPromises.push(p);
       }
       else if ((/.*data$/.test(element.id))) {
 
@@ -222,6 +227,8 @@ async function openDiagram(diagram) {
         document.getElementById(element.id + 'cond').querySelector('textarea').value = element.businessObject.$attrs.text;
       }
     });
+
+    await Promise.all(dataTaskPromises);
 
     const extensionElements = modeler.getDefinitions().extensionElements;
     if (extensionElements) {
@@ -244,7 +251,38 @@ async function openDiagram(diagram) {
 
     console.log('Diagram loaded and elements parsed.');
     //jesper
-    simulationSupport.toggleSimulation(true);
+
+    await new Promise(resolve => {
+      const check = () => {
+        const ready = dataTask_list.every(id => {
+          const el = document.getElementById(id);
+          return el && el.querySelector('textarea') && el.querySelector('button');
+        });
+
+        if (ready) {
+          resolve();
+        } else {
+          setTimeout(check, 100);
+        }
+      };
+      check();
+    });
+
+
+
+
+    const toggleBtn = document.querySelector('.bts-toggle-mode');
+    if (toggleBtn) {
+      toggleBtn.click();
+
+    }
+    setTimeout(() => {
+      if (!simCall) {
+        console.log('Starting simulateProcess automatically...');
+        simulateProcess();
+      }
+    }, 500);
+
 
 
   } catch (err) {
@@ -606,11 +644,12 @@ window.addEventListener('click', (event) => {
 const simulationSupport = modeler.get('simulationSupport');
 
 // Enable simulation
-//jesper
+
 
 //simulationSupport.toggleSimulation(true);
 let isRunning = true;
 let simCall = false
+
 window.onload = function () {
 
   const div = document.querySelector(".bts-toggle-mode");
@@ -661,6 +700,7 @@ async function simulateProcess() {
   simulationLoop = (async () => {
     while (isRunning) {
       try {
+        console.log('Simulation started!');
         simCall = true;
         const result = await simulationSupport.elementEnter('ta:DataTask');
         console.log('Simulation result:', result);
