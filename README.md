@@ -5,12 +5,12 @@
 A tool for modelling data-aware BPMN with simulation capablities, inspired by [delta-BPMN](https://link.springer.com/chapter/10.1007/978-3-030-85469-0_13) and built as a [bpmn-js](https://github.com/bpmn-io/bpmn-js) extension. This tool includes process variables (volitile data) and custom data objects that can interact with and minipulate persistant data in a database. 
 
 
-## Overview
+# Overview
 
-# Running example
+## Running example
 Throughout this page we will be showcasing examples from the model available upon running the program. There is also an sql file located at _data-BPMN/jobApplicationExample/jobApplication.sql_ that can be run in a DBMS to use the model.
 
-# How to use the tool
+## How to use the tool
 Upon startup the front page will be shown where a link to the modelling and viewing tools. Bellow this is the database connection hub. Here the user can establish a connection to a database. It is possible to use the tool without connecting to a database but then the functionallity will be limited. 
 
 <p align="left">
@@ -56,7 +56,7 @@ It is also possible to showcase the database in a new window where it is possibl
 </p>
 
 
-## Turtorial
+# Turtorial
 In this turtorial only the custom data objects introduced by this extension will be explained.
 There are two ways of creating a data-task object. Fristly in the left toolbar the blue database icon will create a data-task and secondly while an object is selected the eelement pallet will also show the data-task icon.
 <p align="left">
@@ -69,7 +69,7 @@ By click the dropdown menu button, in the bottom of the data-task, a textfield w
   <img src="images/dataTaskDB.png" width="300" alt="Some Text"> 
 </p>
 
-# Precondition
+## Precondition
 The syntax of a data-task is specifeied as follows:
 _When precondition then effect_ or just _effect_
 The precondition can either be a logical expression consisting of constants and/or process variables, where the operations __<,>,<=,>=,==,!=__ are allowed, or a select statment in the format:
@@ -106,7 +106,7 @@ when the simulation reaches the datatask a popup will appear promting the user t
 
 An example of Insert,Delete,Update,Assign will be shown below. In my example i will be using a Database over Shopping mall with the revelevant tables of 
 
-# Insert
+## Insert
 The formal definition of insert is _INSERT a1=v1,...,an=vn INTO R_ where a1..an are the atribute names in table R and v1..vn are values.
 
 <p align="left">
@@ -114,14 +114,14 @@ The formal definition of insert is _INSERT a1=v1,...,an=vn INTO R_ where a1..an 
 </p>
 
 
-# Delete
+## Delete
 The formal definition of delete is _DELETE v1,...,vn FROM R_ where v1..vn are the values of atributes in table R (not every attribute needs to be specified just primary key(s))
 
 <p align="left">
   <img src="images/deleteExample.png" width="300" alt="Some Text"> 
 </p>
 
-# update
+## update
 The formal definition of Update is
 <p align="left">
   <img src="images/updateFormalDef.png" width="300" alt="Some Text"> 
@@ -134,12 +134,9 @@ An example can be seen bellow.
   <img src="images/updateExample.png" width="300" alt="Some Text"> 
 </p>
   
-
 Update is case sensitive in the attribute names such as Location and Name.
 
- 
-
-## Control flow
+ # Control flow
 Another custom component is the conditional flow. This adds conditions to the sequence flow out of an exclusive gateway. The conditions support constants and process variables and the operations __<,>,<=,>=,==,!=__. 
 Custom control flow is added using the element menu by clicking on an edge. 
 
@@ -152,13 +149,13 @@ Custom control flow is added using the element menu by clicking on an edge.
 </p>
 
 
-## Simulation Capabilities
+# Simulation Capabilities
 
 The simulation capabilities are built on top of an existing extension [bpmn-js-token-simulation](https://github.com/bpmn-io/bpmn-js-token-simulation). Our extension to the simulation is so it can handle the custom objects specified above. When a token reaches a data task component it then pauses the simulation execution until the task is completed. 
 When a token reaches an exclusive gateway all the sequnce flows conditions are evaluated (if there is no condition the simulator treat them as _True_). It then chooses non-determanisticly between the _True_ sequence flows. If there is no valid path then the simulation will reset.
 
 
-# Failed Query 
+## Failed Query 
 In this example i by mistake tried to delete from a table that is not in the database.
 
 <p align="left">
@@ -166,14 +163,14 @@ In this example i by mistake tried to delete from a table that is not in the dat
 </p>
 
 A popup will then appear, giving you the ability to edit the failed sql query and when clicking confirm it will retry the query. That will happen until a valid query is reached and the simulation will continue or the user cancels the simulation attempt.
-# logger 
+## logger 
 The simulation has a logger that logs all the steps taken in the simulation. The logger on our part focuses on the datatasks and will log if a query succeeded or failed. If it failed it will return the given error from the database. It also logs when the database queries fails or succeeds it also notifies when the simulation pauses and continues from a failed query.
 
 <p align="left">
   <img src="images/logger.PNG" width="300" alt="Some Text">
 </p>
 
-## Clone, Build and Run
+# Clone, Build and Run
 
 Start by cloning this project, then prepare the project by installing all dependencies using npm:
 
