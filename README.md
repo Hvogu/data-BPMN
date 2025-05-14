@@ -63,15 +63,14 @@ Upon startup, the front page will be shown, consisting of two buttons linking to
 
 <p align="left"> <img src="images/frontPage.png" width="300" alt="Some Text"> </p> 
 When the fields are filled in correctly, click the "Connect" button, and the red dot will turn green if the connection is successful. 
-<p align="left"> <img src="images/frontPagewithDatabase.png" width="300" alt="Some Text"> </p> ```
+<p align="left"> <img src="images/frontPagewithDatabase.png" width="300" alt="Some Text"> </p>
 
 ## Modeler layout
 Clicking on the modeler button will bring the user to the modelling tool where all the standard bpmn.io activities and events, see [BPMN components](#bpmn-components), are avaliable as well as the new custom elements and the token-simulation. 
 
+<p align="left"> <img src="images/overviewOfButtons.png" width="500" alt="Some Text"> </p> 
 
-![Alt text](images/overviewOfButtons.png) 
-
-The top left button (1) toggles between the modeler mode and the simulation mode. The bottom 3 buttons (2) are for defining process variables, downloading the diagram, and opening a database overview of the connected database.The toolbar in the left side (3) is where the basic BPMN components, as well as a new custom task, and the tools necessary to interact with the platform are located. 
+The top left button (1) toggles between the modeler mode and the simulation mode. The bottom 3 buttons (2) are for defining process variables, downloading the diagram, and opening a database overview of the connected database. The toolbar in the left side (3) is where the basic BPMN components, as well as a new custom task, and the tools necessary to interact with the platform are located. 
   
 The download button downloads an xml formatted BPMN file, which can then be opened in the platform by dragging  and dropping the file into the tool. 
   
@@ -80,17 +79,17 @@ The process variables button opens a text field where the user can define proces
 The Mariadb button shows a simple overview of all the tables in the database. These tables are clickable and it will show all relations in the selected table. It is only possible to view the database through this feature and not manipulate it. This is of course only available if a database was successfully connected.  
 
 <p align="left">
-  <img src="images/DBButton.png" width="500" alt="Some Text"> 
+  <img src="images/DBButton.png" width="300" alt="Some Text"> 
 </p>
 
  <p align="left">
-  <img src="images/DBWindow.png" width="500" alt="Some Text"> 
+  <img src="images/DBWindow.png" width="300" alt="Some Text"> 
 </p>
 
 It is also possible to showcase the database in a new window where it is possible to see primary key(s) as well as foreign key(s) relations.
 
 <p align="left">
-  <img src="images/DBWindowTable.png" width="500" alt="Some Text"> 
+  <img src="images/DBWindowTable.png" width="800" alt="Some Text"> 
 </p>
 
 # BPMN components
@@ -99,6 +98,7 @@ As mentioned before this tool extends BPMN.io as such we support the BPMN 2.0 st
 2. Events: Start, Intermediate and End events with various triggers
 3. Gateways: Exclusive, Parallel, Event-based ect.
 4. Sequence flows
+
 The above is not an extensive list but the most important for the full documentation see [Camunda](https://docs.camunda.io/docs/components/modeler/bpmn/bpmn-coverage/?utm_source=chatgpt.com). 
 In addition to the BPMN 2.0 functionality we introduce a new custom data-task, explained in [Data-task](#data-task), and custom conditional sequence flow, explained in [Conditional Flow](#conditional-flow).
 
@@ -106,7 +106,10 @@ In addition to the BPMN 2.0 functionality we introduce a new custom data-task, e
 Before explaining how to create and use the new elements, we will define the data components and the data manipulation language.
 
 ## Data components
-We support two types of data, volatile (i.e process variables) and persistent data (i.e a database). The volatile data is execution specific and their current state will not be saved if the program is exited, while any changes to the persistent data will be saved to the connected database. The volatile data can be specified by defining them in the process variable field, by pressing the button shown above in (2), in the format '#[variable name] : [value]'. The variable names must be unique, and the value can be a number or a string, no quotes are necessary. All variables must be separated with a semicolon. Pressing the process button will instantiate the process variables. The process variables will be saved together with the model and upon opening a model the process variables will automatically be instantiated to the default value written in the process variable field.
+We support two types of data, volatile (i.e process variables) and persistent data (i.e a database). The volatile data is execution specific and their current state will not be saved if the program is exited, while any changes to the persistent data will be saved to the connected database. Both of these types of data can be manipulated through the data tasks, according to the specifications of the [language](#data-manipulation-language).
+
+### Variables
+The volatile data can be specified by defining them in the process variable field, by pressing the button shown above in [(2)](#modeler-layout), in the format '#[variable name] : [value]'. The variable names must be unique, and the value can be a number or a string, no quotes are necessary. All variables must be separated with a semicolon. Pressing the process button will instantiate the process variables. The process variables will be saved together with the model and upon opening a model the process variables will automatically be instantiated to the default value written in the process variable field.
 <p align="left">
   <img src="images/processVar2.png" width="300" alt="Some Text">
 </p>
@@ -118,7 +121,8 @@ In this section we will explain the language used to manipulate data. You can se
 ### Syntax
 The language follows a simple syntax of:
 _When precondition then effect_ or just _effect_
-If a precondition is present then it will be evaluated and if and only if it is evaluated to true then the effect will be executed, if there is no precondition then the effect will always be executed.
+
+If a precondition is present then it will be evaluated to either True or False and the effect will be executed if and only if it is evaluated to True. If there is no precondition then the effect will always be executed.
 
 #### Precondition
 The precondition can either be a logical expression consisting of constants and/or process variables/user input, where the operations __<,>,<=,>=,==,!=__ are allowed, or a select statement  in the format:
@@ -157,11 +161,12 @@ The main feature of this extension is the data-task (the blue database icon as s
 <p align="left">
   <img src="images/dataTaskDB.png" width="300" alt="Some Text"> 
 </p>
-Visually the data-task is an activity with a dropdown button that reveals a textbox where the data expression can be written according to the specifications of the [Data Manipulation Language](#data-manipulation-language). The 'Execute' button under the data-task text field will execute the query, this can be used to check if the task does what the user intends.
 
+Visually the data-task is an activity with a dropdown button that reveals a textbox where the data expression can be written according to the specifications of the [language](#data-manipulation-language). The 'Execute' button under the data-task text field will execute the query, this can be used to check if the task does what the user intends.
 
 ## Conditional Flow
 The other custom feature that we have in our extension is the conditional sequence flow. This adds conditions to the sequence flow out of an exclusive gateway. The conditions support constants, process variables and the operations __<,>,<=,>=,==,!=__. 
+
 Custom control flow is added using the element menu by selecting an edge, pressing the tool icon and then selecting 'conditional Sequence Flow' as shown below. 
 
 <p align="left">
