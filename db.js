@@ -36,12 +36,6 @@ function getPool() {
     return pool; // Return the pool object for use in other modules
 }
 
-
-
-
-
-
-
 async function fetchTable(tableName) {
     let conn;
     try {
@@ -58,19 +52,13 @@ async function fetchTable(tableName) {
     }
 }
 
-
-
-
-
-
-
 async function addToTable(tableName, data) {
     let conn;
     try {
         conn = await pool.getConnection(); // Get a connection
 
-        const keys = Object.keys(data);                  // ['Location', 'Capacity']
-        const values = Object.values(data);              // ['Idavej', 108]
+        const keys = Object.keys(data);
+        const values = Object.values(data);
         console.log("keys:", keys);
         console.log("values:", values);
         const valueString = values.map(v =>
@@ -89,7 +77,6 @@ async function addToTable(tableName, data) {
         if (conn) conn.release(); // Release the connection
     }
 }
-
 
 async function deleteFromTable(tableName, data) {
     let conn;

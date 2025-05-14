@@ -686,15 +686,12 @@ window.onload = function () {
 //simulationSupport.toggleSimulation(false);
 let simulationLoop = null;
 
-// You might want to put the simulation process in a function or event handler
 async function simulateProcess() {
-
 
   if (simulationLoop) {
     console.warn('Simulation already running!');
     return;
   }
-
 
   simulationLoop = (async () => {
     while (isRunning) {
@@ -704,18 +701,13 @@ async function simulateProcess() {
         const result = await simulationSupport.elementEnter('ta:DataTask');
         console.log('Simulation result:', result);
 
-
         const datatask = document.getElementById(`${result.element.id}drop`);
 
         const textarea = document.getElementById(`${datatask.id}sql`);
 
-
-
-
         const execute = document.getElementById(`${result.element.id}exe`);
         await simulateExecution(result.element.id);
 
-        // ✅ NEW: Pause if needed
         while (isPaused) {
           console.log('Simulation paused...waiting for fix.');
           await new Promise(resolve => setTimeout(resolve, 100));
@@ -741,8 +733,7 @@ async function simulateProcess() {
       }
     }
 
-
-    simulationLoop = null; // ✅ Clear when exiting
+    simulationLoop = null;
   })();
 
 }
@@ -966,30 +957,34 @@ function createDropdown(param, db) {
       const sql = extractPreAndEffect(textWithUserInput);
       console.log("preCon: " + sql.pre);
       console.log("Effect: " + sql.effect);
+      try {
+        //vores pis kode
+        if (sql.pre != undefined) {
+          sql.pre = processVarParser(sql.pre);
+          let preCon = await handlePreCon(sql.pre);
+          if (preCon.isTrue) {
+            try {
+              sql.effect = await chooseSelRes(sql.effect, preCon.result);
 
-      //vores pis kode
-      if (sql.pre != undefined) {
-        sql.pre = processVarParser(sql.pre);
-        let preCon = await handlePreCon(sql.pre);
-        if (preCon.isTrue) {
+              handleEffect(sql.effect);
+
+            } catch (err) {
+              console.error(err)
+            }
+          }
+        }
+        else {
           try {
-            sql.effect = await chooseSelRes(sql.effect, preCon.result);
-
             handleEffect(sql.effect);
-
           } catch (err) {
             console.error(err)
           }
         }
+      } catch (err) {
+        console.error(err)
+        // Handle the error here, e.g., show an error message to the user
+        alert('Error executing SQL: ' + err.message);
       }
-      else {
-        try {
-          handleEffect(sql.effect);
-        } catch (err) {
-          console.error(err)
-        }
-      }
-
 
 
 
@@ -1093,7 +1088,6 @@ function createButton(func, param, db) {
 }
 
 function createCondition(id) {
-  const parent = document.getElementById(id);
   const cond = document.createElement('div')
   const textarea = document.createElement('textarea'); textarea.placeholder = 'Write condition e.g. #var !=5'; textarea.style.width = '178px'; textarea.style.height = '60px';
   textarea.position = 'relative'; textarea.stopPropagation
@@ -1129,7 +1123,7 @@ function createCondition(id) {
       evaluate.style.display = 'block';
       textarea.style.display = 'block';
       label.style.display = 'none';
-      label.classList.remove('label-expanded'); // Remove the CSS class
+      label.classList.remove('label-expanded'); 
     }
   });
 

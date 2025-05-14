@@ -11,19 +11,9 @@ const { forEach } = require('min-dash');
 const { get } = require('http');
 const mariadb = require('mariadb');
 
-
-const newEmployee = {
-    name: 'John boeman',
-    email: 'johnboeman1234@gmail.com',
-    date_of_birth: '1990-10-10',
-    position: 'Developer'
-};
-
-
-
 const app = express();
 const corsOptions = {
-    origin: 'http://localhost:8080', // Replace with your frontend's domain and port
+    origin: 'http://localhost:8080',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
 };
 
@@ -37,8 +27,8 @@ app.use(express.static(path.join(__dirname, 'NewWindowsHTML')));
 app.get('/api/generate-erd', async (req, res) => {
     try {
         console.log("🛠️ Generating schema and ERD...");
-        await getSchema();        // Step 1: Create schema.json
-        await generateErd();      // Step 2: Generate erd-diagram.svg
+        await getSchema();
+        await generateErd();
         res.status(200).json({ success: true, message: 'ERD generated successfully' });
     } catch (error) {
         console.error("❌ Failed to generate ERD:", error);
@@ -157,6 +147,7 @@ app.get("/api/getPrimaryKey/:tableName", async (req, res) => {
     }
 }
 );
+
 app.get("/api/getForeignKeys/:tableName", async (req, res) => {
     const tableName = req.params.tableName;
     if (!tableName || tableName === "") {

@@ -2,41 +2,80 @@
 
 [![CI](https://github.com/bpmn-io/bpmn-js-token-simulation/workflows/CI/badge.svg)](https://github.com/bpmn-io/bpmn-js-token-simulation/actions?query=workflow%3ACI)
 
-A tool for modelling data-aware BPMN with simulation capablities, inspired by [delta-BPMN](https://link.springer.com/chapter/10.1007/978-3-030-85469-0_13) and built as a [bpmn-js](https://github.com/bpmn-io/bpmn-js) extension. This tool includes process variables (volitile data) and custom data objects that can interact with and minipulate persistant data in a database. 
+This is a web based tool for modelling buissiness processes with data manipulation elements, inspired by [delta-BPMN](https://link.springer.com/chapter/10.1007/978-3-030-85469-0_13) and built as a [bpmn-js](https://github.com/bpmn-io/bpmn-js) extension. The process control flow is modelled using BPMN, where gateways and activities can be provided with explicit definitions of data manipulation expressions. Such expressions operate over the volatile (i.e., process variables) and persistent (i.e., a database) data. We describe below how to manipulate these data components below.
 
+# Tool dependencies
+This platform is a JavaScript extension of bpmn.io and therfore the main codebase is the bpmn-js libary. We utilise NPM (Node Package Manager) as a package manger, which is recomended by bpmn.io's forums [Forum](https://bpmn.io/toolkit/bpmn-js/walkthrough/). 
+Other than this libary there are a number of important dependencies:
+## bpmn-js-token-simulation (v 0.31.1)
+This is an extension for bpmn-js that enables token-based simulation capabilities for BPMN models.
 
-# Overview
+## buffer (v 6.0.3)
+A utility library essential for managing binary data, which is required for some visual elements.
 
-## Running example
-Throughout this page we will be showcasing examples from the model available upon running the program. There is also an sql file located at _data-BPMN/jobApplicationExample/jobApplication.sql_ that can be run in a DBMS to use the model.
+## downloadejs (v 1.4.7)
+This library is used to download files in web applications. We use it to download the diagrams in XML format.
 
-## How to use the tool
-Upon startup, the front page will be shown consisting of two buttons linking to the modelling and viewing tools. Below this is the database connection hub. Here the user can establish a connection to a database. It is possible to use the tool without connecting to a database but then the functionallity will be limited. 
+## inherits-browser (v 0.1.0)
+This library handles inheritance for JavaScript classes and is a dependency for token simulation.
 
-<p align="left">
-  <img src="images/frontPage.png" width="300" alt="Some Text">
-</p>
+## webpack (v 5.74.0)
+A module bundler used to compile JavaScript modules and assets for the project.
 
-In order to connect to your database you will need to fill in the neccessary fields of  Host (IP-address/localhost), Port(the port running the database server), User, Password, and database name.
-When filled, click the "Connect" button and the red dot will turn green if the connection is established.
+## webpack-cli (v 4.10.0)
+A command-line interface for webpack, used to configure and run webpack tasks.
 
-<p align="left">
-  <img src="images/frontPagewithDatabase.png" width="300" alt="Some Text">
-</p>
+## webpack-dev-server (v 4.11.1)
+A development server for webpack that provides live reloading and other development features.
 
+## express (v 4.21.2)
+A minimal and flexible Node.js web application framework used to build the server-side components of the tool.
 
-Clicking on the modeler button will bring the user to the modelling tool where all the standard bpmn.io activities and events are avaliable as well as the new custom elements and the token-simulation. 
+## MariaDB (v 3.4.0)
+MariaDB is an open-source relational database management system (RDBMS) that is a fork of MySQL. It is designed to provide high performance, scalability, and reliability for managing structured data. MariaDB is used in this project to store and manage persistent data, such as process variables and database tables, which are accessed and manipulated during the simulation and modeling processes.
+
+# Setup
+
+## Clone, Build and Run
+Start by cloning this project, then prepare the project by installing all dependencies using npm in the root of the project:
+
+```sh
+npm install
+```
+
+Then use the following command:
+
+```sh
+
+# spin up the example with server
+npm run start:example2
+```
+## Database
+To use all the features of this tool, an instance of a relational database running on a server is required, and it is therefore assumed that the user has access to one. The required information for a successful database connection is:
+
+1. The host (i.e., the IP address of the host)
+2. The port that the server is listening on
+3. A valid username and password
+4. The name of the desired databas
+
+## Starting up the tool
+Upon startup, the front page will be shown, consisting of two buttons linking to the modeling and viewing tools. Below these is the database connection hub. Here, the user can establish a connection to a database using the information specified above. It is possible to use the tool without connecting to a database, but the functionality will be limited.
+
+<p align="left"> <img src="images/frontPage.png" width="300" alt="Some Text"> </p> 
+When the fields are filled in correctly, click the "Connect" button, and the red dot will turn green if the connection is successful. 
+<p align="left"> <img src="images/frontPagewithDatabase.png" width="300" alt="Some Text"> </p> ```
+
+## Modeler layout
+Clicking on the modeler button will bring the user to the modelling tool where all the standard bpmn.io activities and events, see [BPMN components](#bpmn-components), are avaliable as well as the new custom elements and the token-simulation. 
 
 
 ![Alt text](images/overviewOfButtons.png) 
 
-The top left button toggles between the modeler mode and the simulation mode. The bottom 3 buttons are for defining process variables, downloading the diagram, and opening a database overview of the connected database. The download button downloads an xml formated BPMN file, which can then be opened in the platform by drag and dropping the file into the tool. 
+The top left button (1) toggles between the modeler mode and the simulation mode. The bottom 3 buttons (2) are for defining process variables, downloading the diagram, and opening a database overview of the connected database.The toolbar in the left side (3) is where the basic bpmn components, as well as a new custom task, and the tools nesessary to interact with the platform are located. 
 
-The process variables button opens a text field where the user can define process variables in the format ‘#[variable name] : [value]’. The variable names must be unique, and the value can be a number or a string; no quotes are necessary. All variables must be separated with a semicolon. Pressing the process button will instanciate the process variables. The process variables will be saved together with the model and upon opening a model the process variables will automatically be instantiated.
+The download button downloads an xml formated BPMN file, which can then be opened in the platform by draging and dropping the file into the tool. 
 
-<p align="left">
-  <img src="images/processVar2.png" width="300" alt="Some Text">
-</p>
+The process variables button opens a text field where the user can define process variables. See [data components](#data-components)
 
 The Mariadb button shows a simple overview of all the tables in the database. These tables are clickable and it will show all relations in the selected table. It is only possible to view the database through this feature and not manipulate it. This is of course only available if a database was successfully conected.  
 
@@ -54,95 +93,81 @@ It is also possible to showcase the database in a new window where it is possibl
   <img src="images/DBWindowTable.png" width="500" alt="Some Text"> 
 </p>
 
+# BPMN components
+As mentioned before this tool extends BPMN.io as such we suport the BPMN 2.0 standard, which includes:
+1. Activities: Tasks e.g. Service Task, User task ect. as well as subprocesses 
+2. Events: Start, Intermediate and End events with various triggers
+3. Gateways: Exclusive, Parallel, Event-based ect.
+4. Sequence flows
+The above is not an extinsive list but the most important for the full documentation see [Camunda](https://docs.camunda.io/docs/components/modeler/bpmn/bpmn-coverage/?utm_source=chatgpt.com). 
+In addition to the BPMN 2.0 functionallity we introduce a new custom data-task, explained in [Data-task](#data-task), and custom conditional sequence flow, explained in [Conditional Flow](#conditional-flow).
 
-# Turtorial
-In this turtorial only the custom data objects introduced by this extension will be explained.
-There are two ways of creating a data-task object. The first option is in the left toolbar. The blue database icon will create a data-task. The second open is while an object is selected the element pallet will also show the data-task icon. By clicking on the dataTask icon i will create the datatask and make an edge between the original object and the datatask.
+# Data
+Before explaining how to create and use the new elements, we will define the data components and the data manipulation language.
+
+## Data components
+We support two types of data, volatile (i.e process variables) and persistant data (i.e a database). The volatile data is execution specific and thier current state will not be saved if the program is exited, while any changes to the persistant data will be saved to the connected database. The volalite data can be specified by defining them in the process varriable field, by pressing the button shown above in (2), in the format '#[variable name] : [value]'. The variable names must be unique, and the value can be a number or a string, no quotes are necessary. All variables must be separated with a semicolon. Pressing the process button will instanciate the process variables. The process variables will be saved together with the model and upon opening a model the process variables will automatically be instantiated to the default value written in the process variable field.
 <p align="left">
-  <img src="images/newTask.PNG" width="500" alt="Some Text">
+  <img src="images/processVar2.png" width="300" alt="Some Text">
 </p>
+We also support user input, by writing '@[input-name]' in a data task the user will be promted to input some data.
 
-By clicking the dropdown menu button, in the bottom of the data-task, a textfield will be shown. This is where the user can specify what the data task should do.
+## Data Manipulation Language
+In this section we will explain the language used to manipulate data. You can see a examples of the language [Here](Examples.md).
 
-<p align="left">
-  <img src="images/dataTaskDB.png" width="300" alt="Some Text"> 
-</p>
-
-## Precondition
-The syntax of a data-task is specifeied as follows:
+### Syntax
+The language follows a simple syntax of:
 _When precondition then effect_ or just _effect_
-The precondition can either be a logical expression consisting of constants and/or process variables, where the operations __<,>,<=,>=,==,!=__ are allowed, or a select statment in the format:
-_select attribute(s) from table(s) where filter_ (normal sql format and functionality).
+If a precondition is pressent then it will be evaluated and if and only if it is evaluated to true then the effect will be executed, if there is no precondition then the effect will always be executed.
+
+#### Precondition
+The precondition can either be a logical expression consisting of constants and/or process variables/user input, where the operations __<,>,<=,>=,==,!=__ are allowed, or a select statment in the format:
+_select attribute(s) from table(s) where filter_ (Here a filter is any valid sql filter such as 'attribute = x').
 If anything is returend from the select statment the precondition is evaluated to true.
-After a successfull select precondition the user will be promted to choose between the returned results, this allows the user to use any returned atributes in the effect.
-If there is no precondition the effect will always be executed.
 
+#### Effect
+The effect can be:
+1. Updates of process variables i.e #var = x, #var2 = y
+2. Insert
+3. Delete
+4. Update
 
-Here is a small example of how data from a select precondition is handeled.
-This query selects all the names and mallid's from store and then assigns the to the process variables #var and #str
+We also allow for values retured by a select precondition to be used in the effect. This mean that if the precondition is _select x from y_ then any mention of x in the effect will be changed to the specifc value returend by the querry.
 
-<p align="left">
-  <img src="images/selEx.png" width="300" alt="Some Text"> 
-</p>
-
-<p align="left">
-  <img src="images/selExRes.png" width="300" alt="Some Text"> 
-</p>
-
-
-Primary keys cannot be changed and should not be changed therefore we do not support the change of primaryKeys
-
-Our data task also supports user input variables that are written with a @ like _@inputVariable_. When the simulation reaches the datatask it will ask you to fill in your input variables.
-
-<p align="left">
-  <img src="images/userInput.png" width="300" alt="Some Text"> 
-</p>
-When the simulation reaches the datatask a popup will appear promting the user to fill in the input variables 
-
-<p align="left">
-  <img src="images/userInput2.png" width="300" alt="Some Text"> 
-</p>
-
-An example of Insert,Delete,Update,Assign will be shown below. In our examples we will be using a Database over Shopping mall with the revelevant tables of 
-
-## Insert
+##### Insert
 The formal definition of insert is _INSERT a1=v1,...,an=vn INTO R_ where a1..an are the atribute names in table R and v1..vn are values.
 
-<p align="left">
-  <img src="images/insertEx.png" width="300" alt="Some Text"> 
-</p>
-
-
-## Delete
+##### Delete
 The formal definition of delete is _DELETE v1,...,vn FROM R_ where v1..vn are the values of atributes in table R (not every attribute needs to be specified just primary key(s))
 
-<p align="left">
-  <img src="images/delEx.png" width="300" alt="Some Text"> 
-</p>
-
-## update
+##### Update
 The formal definition of Update is
 <p align="left">
   <img src="images/updateFormalDef.png" width="300" alt="Some Text"> 
 </p>
-Where a1..am is an attribute in a table R and u1..um is a value and F1..Fk are conditions.
+Where a1..am is an attribute in a table R and v1..vm is a value and F1..Fk are conditions.
 This will go through the specified table row for row and see if the current row satisfies any of the conditions. The attributes will be set to the values specified in the _THEN_ clause of the first satisfied condition. The update statement can have an _ELSE_ which changes every row that is not included in one of the _WHEN_ clauses_. If _ELSE_ is not specifed then all rows in the database that do not satisfy one of the conditions remain unaltered. If a new value is not specified for a given atribute then it will remain unaltered.
 
-An example can be seen below.
-<p align="left">
-  <img src="images/upEx.png" width="300" alt="Some Text"> 
-</p>
-  
-Update is case sensitive in the attribute names such as Location and Name.
 
- # Control flow
-Another custom component is the conditional flow. This adds conditions to the sequence flow out of an exclusive gateway. The conditions support constants and process variables and the operations __<,>,<=,>=,==,!=__. 
-Custom control flow is added using the element menu by clicking on an edge. 
+## Data-task
+The main feature of this exstension is the data-task (the blue database icon as seen bellow and in [(3)](#modeler-layout)) which is a custom activity that allows for data manipulation. 
+<p align="left">
+  <img src="images/newTask.PNG" width="500" alt="Some Text">
+</p>
+<p align="left">
+  <img src="images/dataTaskDB.png" width="300" alt="Some Text"> 
+</p>
+Visually the data-task is an activity with a dorpdown button that reveals a textbox where the data expression can be written according to the specifications of the [Data Manipulation Language](#data-manipulation-language). The 'Execute' button under the data-task text field will execute the querry, this can be uesed to check if the task does what the user intends.
+
+## Conditional Flow
+The other custom feature that we have in our extension is the conditional sequence flow. This adds conditions to the sequence flow out of an exclusive gateway. The conditions support constants, process variables and the operations __<,>,<=,>=,==,!=__. 
+Custom control flow is added using the element menu by selecting an edge, pressing the tool icon and then selecting 'conditional Sequence Flow' as shown bellow. 
 
 <p align="left">
   <img src="images/cond1.png" width="300" alt="Some Text">
 </p>
 
+A dropdown menu will then apear, where the user can specify the condition.
 <p align="left">
   <img src="images/cond2.png" width="300" alt="Some Text">
 </p>
@@ -150,41 +175,9 @@ Custom control flow is added using the element menu by clicking on an edge.
 
 # Simulation Capabilities
 
-The simulation capabilities are built on top of an existing extension [bpmn-js-token-simulation](https://github.com/bpmn-io/bpmn-js-token-simulation). Our extension of the simulation is to make it can handle the custom objects specified above correctly. When a token reaches a data task component, it then pauses the simulation execution until the task is completed. 
-When a token reaches an exclusive gateway all the sequnce flows conditions are evaluated (if there is no condition the simulator treat them as _True_). It then chooses non-determanisticly between the _True_ sequence flows. If there is no valid path then the simulation will reset.
+The simulation capabilities are built on top of an existing extension [bpmn-js-token-simulation](https://github.com/bpmn-io/bpmn-js-token-simulation). We have extented it so it can handle the custom objects specified above. When a token reaches a data task component, it then pauses the simulation execution until the task is completed. It logs information of the task such as the evaluation of the precodition, if pressent, the updated value of any process variables or if changes to volatile data was successfull or not. If a querry to the database fails the user will have the opertunity to change the data-task and try again, the error from the database will be available in the logger, this is not a perfect solution because the input cuasing the violation may have happend in another task and is therfore not able to be changed if this is the case the user has to exit the simulation.
 
-
-## Failed Query 
-In this example i by mistake tried to delete from a table that is not in the database.
-
-<p align="left">
-  <img src="images/failedQuery.png" width="300" alt="Some Text"> 
-</p>
-
-A popup will then appear, giving you the ability to edit the failed sql query and when clicking confirm it will retry the query. That will happen until a valid query is reached and the simulation will continue or the user cancels the simulation attempt.
-## logger 
-The simulation has a logger that logs all the steps taken in the simulation. The logger on our part focuses on the datatasks and will log if a query succeeded or failed. If it failed it will return the given error from the database. It also logs when the database queries fails or succeeds it also notifies when the simulation pauses and continues from a failed query.
-
-<p align="left">
-  <img src="images/logger.png" width="300" alt="Some Text">
-</p>
-
-# Clone, Build and Run
-
-Start by cloning this project, then prepare the project by installing all dependencies using npm:
-
-```sh
-npm install
-```
-
-Then use the following command:
-
-```sh
-
-# spin up the example with server
-npm run start:example2
-```
-
+When simulating the model, and a token reaches an exclusive gateway, the simulation engine will evaluate all the conditions over the current state of varriables, any non conditional sequence flow will always be evaluated to true. After this a path will non deterministically by choosen. If no valid paths are found the simulation will log this and then exit.
 
 ## Links
 
