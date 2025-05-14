@@ -17,7 +17,8 @@ Throughout this page we will be showcasing examples from the model of a job appl
 </p>
 
 ## How To Precondition
-Bellow is shown two examples, first of a logical precodition and then of a select precondition:
+Below is shown two examples, first of a logical precodition and then of a select precondition:
+
 1:
 <p align="left">
   <img src="images/pre.png" width="300" alt="Some Text"> 
@@ -28,11 +29,11 @@ What this task does if either the process variable #job_ex is grater than 5 or i
 <p align="left">
   <img src="images/selEx.png" width="300" alt="Some Text"> 
 </p>
-A select precondition that returns the attributes: _id, name, jobExperience, current_position_ from the table _CV_.
+A select precondition that returns the attributes: id, name, jobExperience and current_position from the table CV.
 After a successfull select precondition the user will be promted, by a popup, to choose between the returned results.
 
 <p align="left">
-  <img src="images/selExRes.png" width="300" alt="Some Text"> 
+  <img src="images/selExRes.png" width="500" alt="Some Text"> 
 </p>
 
 Then the mentions of these attributes in the effect will be substituted for the chossen values before the effect is executed. 
