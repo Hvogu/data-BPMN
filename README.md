@@ -5,7 +5,7 @@
 This is a web based tool for modelling business processes with data manipulation elements, inspired by [delta-BPMN](https://link.springer.com/chapter/10.1007/978-3-030-85469-0_13) and built as a [bpmn-js](https://github.com/bpmn-io/bpmn-js) extension. The process control flow is modelled using BPMN, where gateways and activities can be provided with explicit definitions of data manipulation expressions. Such expressions operate over the volatile (i.e., process variables) and persistent (i.e., a database) data. We describe below how to manipulate these data components.
 
 # Tool dependencies
-This platform is a JavaScript extension of bpmn.io and therefore the main codebase is the bpmn-js library. We utilise NPM (Node Package Manager) as a package manger, which is recommended by bpmn.io's [Forum](https://bpmn.io/toolkit/bpmn-js/walkthrough/). Other than this library there are a number of important dependencies:
+This platform is a JavaScript extension of bpmn.io and therefore the main codebase is the bpmn-js library. We utilize NPM (Node Package Manager) as a package manger, which is recommended by bpmn.io's [Forum](https://bpmn.io/toolkit/bpmn-js/walkthrough/). Other than this library there are a number of important dependencies:
 
 1. bpmn-js-token-simulation (v 0.31.1)
 This is an extension for bpmn-js that enables token-based simulation capabilities for BPMN models.
